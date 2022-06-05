@@ -1,0 +1,8 @@
+aiofiles==0.8.0
+httptools==0.4.0
+multidict==6.0.2
+PyYAML==6.0
+sanic==22.3.2
+sanic-ext==22.3.2
+sanic-routing==22.3.0
+websockets==10.3

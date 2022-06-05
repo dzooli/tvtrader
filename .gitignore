@@ -1,0 +1,34 @@
+.DS_Store
+/frontend/node_modules
+/frontend/dist
+
+/frontend/tests/e2e/videos/
+/frontend/tests/e2e/screenshots/
+
+
+# local env files
+/frontend/.env.local
+/frontend/.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+node_modules
+
+# Frontend files
+/backend/Lib
+/backend/Include
+*.exe
+*.pyc
+
