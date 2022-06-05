@@ -15,3 +15,21 @@ This is a helper application for Tradingview alerts.
 - Sanic for the Python backend
 - Vue with Vuex and Vuetify for the frontend
 - Docker for containerization (coming soon)
+
+## Installation
+
+### Backend
+
+```bash
+cd backend
+pip install -f requirements.txt
+source Scripts/activate
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm -g i yarn
+yarn install
+```
