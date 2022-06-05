@@ -31,4 +31,5 @@ node_modules
 /backend/Include
 *.exe
 *.pyc
+*.code-workspace
 
