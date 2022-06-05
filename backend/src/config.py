@@ -7,6 +7,7 @@ class AppConfig(Config):
     DEV=True
     API_TITLE="TvTrader API",
     OAS_IGNORE_OPTIONS=False,
+    CORS=True
     SWAGGER_UI_CONFIGURATION = {
             "apisSorter": "alpha",
             # "jsonEditor": "true",

@@ -1,25 +1,10 @@
-from importlib.metadata import requires
 from sanic import Sanic
-from sanic.log import logger
-from sanic_ext import openapi
 
 from config import AppConfig
-from responses.JsonResponse import JsonSuccessResponse
-
+from views.Home import HomeView
 
 app = Sanic("TvTrader", config=AppConfig())
-
-
-@app.get("/")
-async def homepage(request):
-    app = Sanic.get_app()
-    return JsonSuccessResponse.create("Health OK from " + app.config.APPNAME)
-
-
-@app.post("/", strict_slashes=False)
-async def post_alert(request):
-    logger.info("POST received: " + str(request.body))
-    return JsonSuccessResponse.create("OK")
+app.add_route(HomeView.as_view(), "/")
 
 if __name__ == '__main__':
     app.run(host="127.0.0.1",
