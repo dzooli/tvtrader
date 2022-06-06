@@ -1,16 +1,11 @@
 <template>
-  <hello-world />
+  <AlertView maxItems="10" />
 </template>
 
 <script>
-import HelloWorld from "../components/HelloWorld";
+import AlertView from "@/components/AlertView.vue";
 
 export default {
-  // eslint-disable-next-line
-  name: "Home",
-
-  components: {
-    HelloWorld,
-  },
+  components: { AlertView },
 };
 </script>
