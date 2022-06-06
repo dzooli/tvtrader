@@ -22,8 +22,9 @@ This is a helper application for Tradingview alerts.
 
 ```bash
 cd backend
-pip install -f requirements.txt
+python -m venv .
 source Scripts/activate
+pip install -f requirements.txt
 ```
 
 ### Frontend
