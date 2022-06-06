@@ -1,5 +1,5 @@
 <template>
-  <AlertView maxItems="10" />
+  <AlertView />
 </template>
 
 <script>

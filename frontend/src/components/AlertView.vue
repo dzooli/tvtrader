@@ -14,14 +14,14 @@
     <v-row justify="center">
       <v-col class="mb-4" cols="4" offset="1">
         <v-text-field
-          label="Test Message"
+          label="Test Message in JSON format"
           :rules="rules"
           hide-details="auto"
           v-model="message"
         ></v-text-field>
       </v-col>
       <v-col class="mb-4" cols="2">
-        <v-btn @click="addItem()" color="primary">Add</v-btn>
+        <v-btn @click="addItem()" color="primary">Add Test</v-btn>
       </v-col>
     </v-row>
 
@@ -34,7 +34,6 @@
 <script>
 export default {
   name: "AlertView",
-  props: ["maxItems"],
 
   data: () => ({
     message: "",
@@ -44,26 +43,13 @@ export default {
         (value && typeof value == "string" && value.length >= 5) ||
         "Minimum 5 characters",
     ],
-    alerts: [],
   }),
-
-  mounted() {
-    this.alerts = new Array();
-    this.alerts.push({ symbol: "EURUSD", direction: "BUY", timestamp: 12 });
-  },
 
   methods: {
     addItem() {
-      this.alerts.unshift({
-        symbol: "GBPUSD",
-        direction: "SELL",
-        timestamp: 42,
-      });
-      if (this.alerts.length > this.maxItems) {
-        this.alerts.splice(this.alerts.length - 1, 1);
-      }
-
-      console.log(this.alerts);
+      var newAlert = JSON.parse(this.message);
+      this.$store.commit("addAlert", newAlert);
+      console.log(this.$store.getters.alerts);
     },
   },
 };
