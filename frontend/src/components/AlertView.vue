@@ -49,7 +49,15 @@ export default {
     addItem() {
       var newAlert = JSON.parse(this.message);
       this.$store.commit("addAlert", newAlert);
-      console.log(this.$store.getters.alerts);
+      console.log(this.alerts);
+    },
+  },
+
+  computed: {
+    alerts: {
+      get() {
+        return this.$store.getters.alerts;
+      },
     },
   },
 };
