@@ -27,8 +27,6 @@ pnpm-debug.log*
 node_modules
 
 # Frontend files
-/backend/Lib
-/backend/Include
 *.exe
 *.pyc
 *.code-workspace
