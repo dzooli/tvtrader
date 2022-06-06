@@ -6,3 +6,5 @@ sanic==22.3.2
 sanic-ext==22.3.2
 sanic-routing==22.3.0
 websockets==10.3
+wheel
+
