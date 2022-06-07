@@ -18,7 +18,8 @@
           :rules="rules"
           hide-details="auto"
           v-model="message"
-        ></v-text-field>
+        >
+        </v-text-field>
       </v-col>
       <v-col class="mb-4" cols="2">
         <v-btn @click="addItem()" color="primary">Add Test</v-btn>
