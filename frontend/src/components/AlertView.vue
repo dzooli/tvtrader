@@ -11,6 +11,7 @@
       </v-col>
     </v-row>
 
+    <!-- Test input field -->
     <v-row justify="center">
       <v-col class="mb-4" cols="4" offset="1">
         <v-text-field
@@ -26,6 +27,16 @@
       </v-col>
     </v-row>
 
+    <!-- Alert table -->
+    <v-row justify="center">
+      <v-col>
+        <h1>Alerts</h1>
+      </v-col>
+    </v-row>
+    <v-row justify="center">
+      <v-col><AlertTable /></v-col>
+    </v-row>
+
     <v-row justify="center">
       <v-col class="mb-4" cols="6" offset="4"> </v-col>
     </v-row>
@@ -33,9 +44,9 @@
 </template>
 
 <script>
+import AlertTable from "./AlertTable.vue";
 export default {
   name: "AlertView",
-
   data: () => ({
     message: "",
     rules: [
@@ -45,21 +56,12 @@ export default {
         "Minimum 5 characters",
     ],
   }),
-
   methods: {
     addItem() {
       var newAlert = JSON.parse(this.message);
       this.$store.commit("addAlert", newAlert);
-      console.log(this.alerts);
     },
   },
-
-  computed: {
-    alerts: {
-      get() {
-        return this.$store.getters.alerts;
-      },
-    },
-  },
+  components: { AlertTable },
 };
 </script>
