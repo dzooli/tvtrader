@@ -69,13 +69,15 @@ export default {
   methods: {
     getRowClass(alert) {
       let baseclass = "item-row ";
-      if (alert.timedout) return baseclass + "timedout";
-      return alert.direction == "SELL" ? baseclass + "sell" : baseclass + "buy";
+      return alert.timedout
+        ? baseclass + "timedout"
+        : alert.direction == "SELL"
+        ? baseclass + "sell"
+        : baseclass + "buy";
     },
 
     getRowId(item) {
-      let id = item.stratId.toString() + item.symbol + item.timestamp;
-      return id;
+      return item.stratId.toString() + item.symbol + item.timestamp;
     },
 
     getTime(timestamp) {
