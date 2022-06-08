@@ -1,6 +1,6 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import HomeView from "../views/HomeView.vue";
+import AlertView from "../views/AlertView.vue";
 
 Vue.use(VueRouter);
 
@@ -8,7 +8,7 @@ const routes = [
   {
     path: "/",
     name: "alerts",
-    component: HomeView,
+    component: AlertView,
   },
   {
     path: "/about",

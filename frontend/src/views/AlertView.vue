@@ -1,18 +1,7 @@
 <template>
   <v-container>
-    <v-row class="text-center">
-      <v-col cols="12">
-        <v-img
-          :src="require('../assets/logo.svg')"
-          class="my-3"
-          contain
-          height="200"
-        />
-      </v-col>
-    </v-row>
-
     <!-- Test input field -->
-    <v-row justify="center">
+    <v-row v-if="this.$store.getters.devmode" justify="center">
       <v-col class="mb-4" cols="4" offset="1">
         <v-text-field
           label="Test Message in JSON format"
@@ -22,19 +11,17 @@
         >
         </v-text-field>
       </v-col>
-      <v-col class="mb-4" cols="2">
-        <v-btn @click="addItem()" color="primary">Add Test</v-btn>
+      <v-col class="mb-4 pa-10" cols="2">
+        <v-btn @click="addItem()" color="success">Add Test</v-btn>
       </v-col>
     </v-row>
 
     <!-- Alert table -->
     <v-row justify="center">
-      <v-col>
-        <h1>Alerts</h1>
-      </v-col>
+      <h1>Alerts</h1>
     </v-row>
     <v-row justify="center">
-      <v-col><AlertTable /></v-col>
+      <v-col cols="11"><AlertTable name="main-alerts" /></v-col>
     </v-row>
 
     <v-row justify="center">
@@ -44,7 +31,7 @@
 </template>
 
 <script>
-import AlertTable from "./AlertTable.vue";
+import AlertTable from "@/components/AlertTable.vue";
 export default {
   name: "AlertView",
   data: () => ({

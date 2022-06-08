@@ -2,16 +2,20 @@
   <v-data-table
     :headers="headers"
     :items="alerts"
-    item-key="name"
-    style="height: 700px"
+    class="elevation-1"
+    :item-key="name"
   >
     <template v-slot:body="{ items, headers }">
       <tbody name="list" is="transition-group" v-if="items.length > 0">
-        <tr v-for="item in items" :key="item.symbol" class="item-row">
+        <tr
+          v-for="item in items"
+          :key="getRowId(item)"
+          :class="getRowClass(item)"
+          :id="getRowId(item)"
+        >
           <td>{{ item.symbol }}</td>
           <td>{{ item.direction }}</td>
-          <td>{{ item.timestamp }}</td>
-          <td>{{ item.timedout }}</td>
+          <td>{{ getTime(item.timestamp) }}</td>
         </tr>
       </tbody>
       <tbody v-else>
@@ -25,36 +29,59 @@
   </v-data-table>
 </template>
 
+<style>
+.sell {
+  background-color: crimson;
+}
+.buy {
+  background-color: forestgreen;
+}
+.timeout {
+  background-color: darkgrey;
+}
+.v-data-table-header {
+  background-color: black;
+}
+.v-data-table {
+  border: 1px solid wheat;
+}
+.theme--dark.v-data-table {
+  color: yellow !important;
+}
+</style>
+
 <script>
 export default {
   name: "AlertTable",
+  props: ["name"],
   data: () => ({
-    headers: [
-      { text: "Symbol" },
-      { text: "Direction" },
-      { text: "Timestamp" },
-      { text: "Timed Out" },
-    ],
+    headers: [{ text: "Symbol" }, { text: "Direction" }, { text: "Time" }],
   }),
+
   computed: {
     alerts: {
       get() {
-        console.log("AlertTable get computed alerts called");
-        console.log("Alert count: " + this.$store.getters.alerts.length);
         return this.$store.getters.alerts;
       },
     },
   },
+
   methods: {
-    getSymbolColor(alert) {
-      console.log("gegSymbolColor called with " + alert);
-      if (alert.timedout) {
-        return "lightgray";
-      }
-      if (alert.direction == "BUY") {
-        return "green";
-      }
-      return "red";
+    getRowClass(alert) {
+      let baseclass = "item-row ";
+      if (alert.timedout) return baseclass + "timedout";
+      return alert.direction == "SELL" ? baseclass + "sell" : baseclass + "buy";
+    },
+
+    getRowId(item) {
+      let id = item.stratId.toString() + item.symbol + item.timestamp;
+      return id;
+    },
+
+    getTime(timestamp) {
+      let tsDate = new Date(timestamp * 1000);
+      let timeArray = tsDate.toLocaleTimeString().split(" ");
+      return timeArray[0];
     },
   },
 };

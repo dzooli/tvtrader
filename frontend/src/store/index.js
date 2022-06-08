@@ -5,7 +5,8 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    alertTimeout: 10, // In minutes
+    devmode: true,
+    alertTimeout: 10,
     maxAlerts: 10,
     alerts: [],
   },
@@ -13,6 +14,7 @@ export default new Vuex.Store({
   getters: {
     alerts: (state) => state.alerts,
     maxAlerts: (state) => state.maxAlerts,
+    devmode: (state) => state.devmode,
   },
 
   mutations: {
@@ -23,8 +25,9 @@ export default new Vuex.Store({
      * @param {*} state
      * @param {*} param1
      */
-    addAlert(state, { symbol, direction, timestamp }) {
+    addAlert(state, { stratId, symbol, direction, timestamp }) {
       state.alerts.unshift({
+        stratId: stratId,
         symbol: symbol,
         direction: direction,
         timestamp: timestamp,
@@ -36,6 +39,10 @@ export default new Vuex.Store({
       if (state.alerts.length > state.maxAlerts) {
         state.alerts.splice(state.alerts.length - 1, 1);
       }
+    },
+
+    setDevMode(state, mode) {
+      state.devmode = mode;
     },
   },
 
