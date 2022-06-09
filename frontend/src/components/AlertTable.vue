@@ -66,6 +66,14 @@ export default {
     },
   },
 
+  mounted: function () {
+    this.$store.commit("startAlertTimer", this.updateAlertsTimeOut);
+  },
+
+  beforeDestroy: function () {
+    this.$store.commit("stopAlertTimer");
+  },
+
   methods: {
     getRowClass(alert) {
       let baseclass = "item-row ";
@@ -84,6 +92,10 @@ export default {
       let tsDate = new Date(timestamp * 1000);
       let timeArray = tsDate.toLocaleTimeString().split(" ");
       return timeArray[0];
+    },
+
+    updateAlertsTimeOut() {
+      this.$store.commit("updateAlertsTimeOut");
     },
   },
 };

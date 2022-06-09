@@ -6,7 +6,9 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     devmode: true,
-    alertTimeout: 10,
+    alertTimeout: 1, // timeout for the alert in minutes
+    alertUpdateTime: 5, // timeout update interval in seconds
+    alertTimer: undefined,
     maxAlerts: 10,
     alerts: [],
   },
@@ -15,6 +17,7 @@ export default new Vuex.Store({
     alerts: (state) => state.alerts,
     maxAlerts: (state) => state.maxAlerts,
     devmode: (state) => state.devmode,
+    alertTimeout: (state) => state.alertTimeout,
   },
 
   mutations: {
@@ -43,6 +46,28 @@ export default new Vuex.Store({
 
     setDevMode(state, mode) {
       state.devmode = mode;
+    },
+
+    setAlertTimeout(state, timeOut) {
+      state.alertTimeout = timeOut;
+    },
+
+    startAlertTimer(state, func) {
+      state.alertTimer = setInterval(func, state.alertUpdateTime * 1000);
+    },
+
+    stopAlertTimer(state) {
+      console.log("Stopping alert timeout timer...");
+      clearInterval(state.alertTimer);
+    },
+
+    updateAlertsTimeOut(state) {
+      for (let el of state.alerts) {
+        el.timedout =
+          Date.now() / 1000 - el.timestamp > state.alertTimeout * 60
+            ? true
+            : false;
+      }
     },
   },
 
