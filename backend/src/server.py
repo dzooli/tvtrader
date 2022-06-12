@@ -22,6 +22,17 @@ async def post(request):
     return json("OK")
 
 
+@app.websocket("/alerts")
+@openapi.summary("The alert feeder websocket.")
+async def feed(request, ws):
+    while True:
+        data = None
+        data = await ws.recv()
+        if data is not None:
+            logger.info("ws data received: " + str(data))
+            await ws.send(data)
+
+
 if __name__ == '__main__':
     app.run(host="127.0.0.1",
             port=app.config.PORT,
