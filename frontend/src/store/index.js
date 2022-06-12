@@ -57,7 +57,6 @@ export default new Vuex.Store({
     },
 
     stopAlertTimer(state) {
-      console.log("Stopping alert timeout timer...");
       clearInterval(state.alertTimer);
     },
 
