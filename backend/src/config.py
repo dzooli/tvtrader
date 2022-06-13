@@ -1,4 +1,4 @@
-from ssl import ALERT_DESCRIPTION_DECODE_ERROR
+from ssl import ALERT_DESCRIPTION_DECODE_ERROR, ALERT_DESCRIPTION_DECOMPRESSION_FAILURE
 from sanic.config import Config
 
 
@@ -7,6 +7,9 @@ class AppConfig(Config):
     PORT = 8089
     DEV = True
     API_TITLE = "TvTrader API"
+    API_VERSION = '1.0.0'
+    API_DESCRIPTION = "TradingView alert helper API"
+    API_CONTACT_EMAIL = "zoltan.dzooli.fabian@gmail.com"
     OAS_IGNORE_OPTIONS = False
     CORS = True
     CORS_ORIGINS = "http://localhost:8080"
@@ -19,3 +22,4 @@ class AppConfig(Config):
         "operationsSorter": "alpha",
         "docExpansion": "full",
     }
+    WS_URL = "ws://localhost:" + str(PORT) + "/alerts"
