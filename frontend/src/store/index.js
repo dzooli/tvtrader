@@ -6,10 +6,11 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     devmode: true,
-    alertTimeout: 1, // timeout for the alert in minutes
+    alertTimeout: 15, // timeout for the alert in minutes
     alertUpdateTime: 5, // timeout update interval in seconds
     alertTimer: undefined,
     maxAlerts: 10,
+    wsURL: process.env.WEBSOCKET_URL || "ws://localhost:8089/alerts",
     alerts: [],
   },
 
@@ -18,6 +19,7 @@ export default new Vuex.Store({
     maxAlerts: (state) => state.maxAlerts,
     devmode: (state) => state.devmode,
     alertTimeout: (state) => state.alertTimeout,
+    wsURL: (state) => state.wsURL,
   },
 
   mutations: {
@@ -28,9 +30,10 @@ export default new Vuex.Store({
      * @param {*} state
      * @param {*} param1
      */
-    addAlert(state, { stratId, symbol, direction, timestamp }) {
+    addAlert(state, { stratId, stratName, symbol, direction, timestamp }) {
       state.alerts.unshift({
         stratId: stratId,
+        stratName: stratName,
         symbol: symbol,
         direction: direction,
         timestamp: timestamp,
@@ -66,6 +69,12 @@ export default new Vuex.Store({
           Date.now() / 1000 - el.timestamp > state.alertTimeout * 60
             ? true
             : false;
+      }
+    },
+
+    setWsURL(state, url) {
+      if (typeof url == "string") {
+        state.wsURL = url;
       }
     },
   },
