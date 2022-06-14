@@ -27,11 +27,15 @@
       <span>Alerts</span>
     </v-btn>
 
+    <v-spacer></v-spacer>
+
     <v-btn text to="/about">
       <span>About</span>
     </v-btn>
 
-    <v-spacer></v-spacer>
+    <v-btn text to="/settings" title="Settings">
+      <v-icon>mdi-cog-outline</v-icon>
+    </v-btn>
   </v-app-bar>
 </template>
 

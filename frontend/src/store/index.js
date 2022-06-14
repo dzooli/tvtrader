@@ -19,6 +19,7 @@ export default new Vuex.Store({
     maxAlerts: (state) => state.maxAlerts,
     devmode: (state) => state.devmode,
     alertTimeout: (state) => state.alertTimeout,
+    alertRefresh: (state) => state.alertUpdateTime,
     wsURL: (state) => state.wsURL,
   },
 
