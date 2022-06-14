@@ -4,6 +4,7 @@ from sanic.config import Config
 
 class AppConfig(Config):
     APPNAME = "TradingView Trader"
+    TIMEZONE = "Europe/Budapest"
     PORT = 8089
     DEV = True
     API_TITLE = "TvTrader API"
