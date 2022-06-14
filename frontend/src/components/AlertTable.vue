@@ -13,6 +13,7 @@
           :class="getRowClass(item)"
           :id="getRowId(item)"
         >
+          <td>{{ item.stratId }} - {{ item.stratName }}</td>
           <td>{{ item.symbol }}</td>
           <td>{{ item.direction }}</td>
           <td>{{ getTime(item.timestamp) }}</td>
@@ -55,7 +56,13 @@ export default {
   name: "AlertTable",
   props: ["name"],
   data: () => ({
-    headers: [{ text: "Symbol" }, { text: "Direction" }, { text: "Time" }],
+    headers: [
+      { text: "Strategy" },
+      { text: "Symbol" },
+      { text: "Direction" },
+      { text: "Time" },
+    ],
+    wsconnection: undefined,
   }),
 
   computed: {
@@ -68,10 +75,21 @@ export default {
 
   mounted: function () {
     this.$store.commit("startAlertTimer", this.updateAlertsTimeOut);
+    this.wsconnection = new WebSocket(this.$store.getters.wsURL);
+    if (this.wsconnection) {
+      this.wsconnection.onmessage = (event) => {
+        this.$store.commit("addAlert", JSON.parse(event.data));
+      };
+    } else {
+      console.log("Cannot open the WebSocket to: " + this.$store.getters.wsURL);
+    }
   },
 
   beforeDestroy: function () {
     this.$store.commit("stopAlertTimer");
+    if (this.wsconnection) {
+      this.wsconnection.close();
+    }
   },
 
   methods: {
