@@ -1,4 +1,6 @@
+from threading import local
 from turtle import st
+from zoneinfo import ZoneInfo
 from sanic.log import logger
 from sanic_ext import openapi
 from sanic.response import json
@@ -7,6 +9,7 @@ from sanic import Sanic
 import json as js
 import jsonschema
 from datetime import datetime
+from pytz import timezone
 import time
 
 from config import AppConfig
@@ -24,12 +27,13 @@ def check(request):
 
 AlertSchema = {
     "type": "object",
-    "required": ["stratId", "symbol", "direction", "timestamp"],
+    "required": ["stratId", "stratName", "symbol", "direction", "timestamp"],
     "properties": {
-        "stratId": {"type": "number", "minimum": 0},
-        "symbol":  {"type": "string"},
-        "direction": {"type": "string", "maxLength": 4},
-        "timestamp": {"type": "string"}
+        "stratId":      {"type": "number", "minimum": 0},
+        "stratName":    {"type": "string"},
+        "symbol":       {"type": "string"},
+        "direction":    {"type": "string", "maxLength": 4},
+        "timestamp":    {"type": "string"}
     }
 }
 
@@ -37,18 +41,24 @@ AlertSchema = {
 @app.post("/")
 @openapi.summary("Alert POST endpoint. This is the endpoint for the Chrome extension.")
 async def post(request):
+    app = Sanic.get_app()
     # Convert to JSON
     try:
         jsondata = js.loads(request.body.decode('utf-8').replace("'", '"'))
+    except Exception as ex:
+        return json({"ERROR": str(ex)}, status=400)
+    try:
         jsonschema.validate(jsondata, schema=AlertSchema)
     except Exception as ex:
         return json({"ERROR": str(ex)}, status=400)
-    # Format the alert
+    # Format the alert and convert to local time
     try:
+        local_time_zone = timezone(app.config.TIMEZONE)
         t = time.strptime(jsondata["timestamp"], '%Y-%m-%dT%H:%M:%SZ')
         dt = datetime(t.tm_year, t.tm_mon, t.tm_mday,
                       t.tm_hour, t.tm_min, t.tm_sec)
-        timestamp = dt.timestamp()
+        utc_offset = local_time_zone.utcoffset(dt).total_seconds()
+        timestamp = dt.timestamp() + utc_offset
     except Exception as ex:
         return json({"ERROR": str(ex)}, status=400)
     jsondata["timestamp"] = int(timestamp)
@@ -63,7 +73,7 @@ async def post(request):
     return json("OK")
 
 
-@app.websocket("/alerts")
+@ app.websocket("/alerts")
 async def feed(request, ws):
     app = Sanic.get_app()
     logger.info("ws request: " + str(request))
