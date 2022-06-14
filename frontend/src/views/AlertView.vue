@@ -48,20 +48,14 @@ export default {
       let newAlert;
       try {
         newAlert = JSON.parse(this.message);
-        newAlert.timestamp = (Date.now() / 1000).toFixed(0);
       } catch (error) {
         console.log(error);
         return;
       }
 
-      this.$axios
-        .post("/", newAlert)
-        .then((response) => {
-          console.log("POST response is: " + response.data.toString());
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      this.$axios.post("/", newAlert).catch((error) => {
+        console.log(error);
+      });
     },
   },
   components: { AlertTable },
