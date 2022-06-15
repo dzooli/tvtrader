@@ -42,6 +42,7 @@ export default {
   }),
   methods: {
     addItem() {
+      this.$store.commit("setToast", "hello");
       let newAlert;
       try {
         newAlert = JSON.parse(this.message);

@@ -12,6 +12,7 @@ export default new Vuex.Store({
     maxAlerts: "",
     wsURL: "",
     alerts: [],
+    message: "",
   },
 
   getters: {
@@ -21,6 +22,7 @@ export default new Vuex.Store({
     alertTimeout: (state) => state.alertTimeout,
     alertRefresh: (state) => state.alertUpdateTime,
     wsURL: (state) => state.wsURL,
+    toastMessage: (state) => state.message,
   },
 
   mutations: {
@@ -31,7 +33,16 @@ export default new Vuex.Store({
       if (justvaribales == false) {
         state.alerts = [];
         state.alertTimer = undefined;
+        state.message = "";
       }
+    },
+
+    setToast(state, message) {
+      state.message = message;
+    },
+
+    clearToast(state) {
+      state.message = "";
     },
 
     addAlert(state, { stratId, stratName, symbol, direction, timestamp }) {

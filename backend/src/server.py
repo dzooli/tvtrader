@@ -67,6 +67,7 @@ async def post(request):
     for iws in wsclients.copy():
         try:
             await iws.send(js.dumps(jsondata))
+            logger.info("POST data sent to WS: " + js.dumps(jsondata))
         except Exception as ex:
             logger.error("Failed to send the alert via WS! " + str(ex))
             wsclients.remove(iws)
