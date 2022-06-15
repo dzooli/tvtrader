@@ -4821,6 +4821,11 @@ open@^8.0.2, open@^8.0.9:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
+opencollective-postinstall@^2.0.2:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/opencollective-postinstall/-/opencollective-postinstall-2.0.3.tgz#7a0fff978f6dbfa4d006238fbac98ed4198c3259"
+  integrity sha512-8AV/sCtuzUeTo8gQK5qDZzARrulB3egtLzFgteqB2tcT4Mw7B8Kt7JcDHmltjz6FOAHsvTevk70gZEbhM4ZS9Q==
+
 opener@^1.5.2:
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/opener/-/opener-1.5.2.tgz#5d37e1f35077b9dcac4301372271afdeb2a13598"
@@ -6450,6 +6455,13 @@ vue-loader@^17.0.0:
     hash-sum "^2.0.0"
     loader-utils "^2.0.0"
 
+vue-ls@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/vue-ls/-/vue-ls-4.2.0.tgz#47d09a2feb6e2cd7c8de1724c657237f2e58b8ad"
+  integrity sha512-aEQvaFzIH6A0u0in4ghsxiqMgXNxf2+mtgOW8BaiLM6f3gTfvJMjZBjSrycDgdde7P5VfXOqLFGk4+Tf0Mre6Q==
+  dependencies:
+    opencollective-postinstall "^2.0.2"
+
 vue-router@^3.5.1:
   version "3.5.4"
   resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-3.5.4.tgz#c453c0b36bc75554de066fefc3f2a9c3212aca70"
@@ -6476,18 +6488,10 @@ vue-template-es2015-compiler@^1.9.0:
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
   integrity sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==
 
-vue@^2.5.3, vue@^2.6.14:
+vue@^2.6.14:
   version "2.6.14"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.6.14.tgz#e51aa5250250d569a3fbad3a8a5a687d6036e235"
   integrity sha512-x2284lgYvjOMj3Za7kqzRcUSxBboHqtgRE2zlos1qWaOye5yUmHn42LB1250NJBLRwEcdrB0JRwyPTEPhfQjiQ==
-
-vuetify-form-generator@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/vuetify-form-generator/-/vuetify-form-generator-0.0.4.tgz#846fcf6b85f1bb75a390f6805dabebee0e962d8f"
-  integrity sha512-DoXhKnnRNky/iUPvKto/q77SWJ4lBosns+BeQ25JwktR36N7lw4TfPtmjc1IkHlv8hTZ8jXFCaK6kxa1ElO+gA==
-  dependencies:
-    vue "^2.5.3"
-    vuetify "^0.17.4"
 
 vuetify-loader@^1.7.0:
   version "1.7.3"
@@ -6497,11 +6501,6 @@ vuetify-loader@^1.7.0:
     decache "^4.6.0"
     file-loader "^6.2.0"
     loader-utils "^2.0.0"
-
-vuetify@^0.17.4:
-  version "0.17.7"
-  resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-0.17.7.tgz#068c8210473643d45166ef9c5f6eb0ecf26bb5a5"
-  integrity sha512-Brk8dOeR/vkG4By5r2JXtS1jJojP3sFOtyTXtflH7aVPF+14Z0xBNO3nM4QuPgWofHi3pw/9maJZEbDVND7iNQ==
 
 vuetify@^2.6.0:
   version "2.6.6"
