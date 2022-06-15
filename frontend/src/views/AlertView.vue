@@ -18,9 +18,6 @@
 
     <!-- Alert table -->
     <v-row justify="center">
-      <h1>Alerts</h1>
-    </v-row>
-    <v-row justify="center">
       <v-col cols="11"><AlertTable name="main-alerts" /></v-col>
     </v-row>
 

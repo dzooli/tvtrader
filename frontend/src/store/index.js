@@ -5,12 +5,12 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    devmode: true,
-    alertTimeout: 15, // timeout for the alert in minutes
-    alertUpdateTime: 5, // timeout update interval in seconds
+    devmode: "",
+    alertTimeout: "", // timeout for the alert in minutes
+    alertUpdateTime: "", // timeout update interval in seconds
     alertTimer: undefined,
-    maxAlerts: 10,
-    wsURL: process.env.WEBSOCKET_URL || "ws://localhost:8089/alerts",
+    maxAlerts: "",
+    wsURL: "",
     alerts: [],
   },
 
@@ -24,13 +24,16 @@ export default new Vuex.Store({
   },
 
   mutations: {
-    /**
-     * Add the received alert and calculate if it is already timed out.
-     * Timeout value is defined in the state and given in minutes.
-     *
-     * @param {*} state
-     * @param {*} param1
-     */
+    initialize(state, settings, justvaribales) {
+      if (settings) {
+        this.replaceState(Object.assign(state, settings));
+      }
+      if (justvaribales == false) {
+        state.alerts = [];
+        state.alertTimer = undefined;
+      }
+    },
+
     addAlert(state, { stratId, stratName, symbol, direction, timestamp }) {
       state.alerts.unshift({
         stratId: stratId,
@@ -58,10 +61,12 @@ export default new Vuex.Store({
 
     startAlertTimer(state, func) {
       state.alertTimer = setInterval(func, state.alertUpdateTime * 1000);
+      console.log("alert timer started");
     },
 
     stopAlertTimer(state) {
       clearInterval(state.alertTimer);
+      console.log("alert timer stopped");
     },
 
     updateAlertsTimeOut(state) {
@@ -76,6 +81,18 @@ export default new Vuex.Store({
     setWsURL(state, url) {
       if (typeof url == "string") {
         state.wsURL = url;
+      }
+    },
+
+    setMaxAlerts(state, maxAlertCount) {
+      state.maxAlerts = maxAlertCount;
+    },
+
+    setAlertRefresh(state, refresh) {
+      state.alertUpdateTime = refresh;
+      if (state.alertTimer != undefined) {
+        this.commit("stopAlertTimer");
+        this.commit("startAlertTimer");
       }
     },
   },

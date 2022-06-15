@@ -11,9 +11,16 @@
 import NavBar from "@/components/NavBar.vue";
 export default {
   name: "App",
-  data: () => ({
-    //
-  }),
+  data() {
+    return {};
+  },
   components: { NavBar },
+  beforeMount() {
+    this.$store.commit(
+      "initialize",
+      this.$ls.get("settings", this.$settings.$data),
+      false
+    );
+  },
 };
 </script>

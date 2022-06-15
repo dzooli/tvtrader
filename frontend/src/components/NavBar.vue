@@ -23,14 +23,14 @@
 
     <v-spacer class="col-1"></v-spacer>
 
-    <v-btn text to="/">
-      <span>Alerts</span>
+    <v-btn text to="/" title="Alerts">
+      <v-icon>mdi-bell-alert-outline</v-icon>
     </v-btn>
 
     <v-spacer></v-spacer>
 
-    <v-btn text to="/about">
-      <span>About</span>
+    <v-btn text to="/about" title="About">
+      <v-icon>mdi-information-outline</v-icon>
     </v-btn>
 
     <v-btn text to="/settings" title="Settings">
