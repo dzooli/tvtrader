@@ -2,7 +2,7 @@
   <v-data-table
     :headers="headers"
     :items="alerts"
-    class="elevation-1"
+    :class="tableConnected"
     :item-key="name"
   >
     <template v-slot:body="{ items, headers }">
@@ -43,6 +43,9 @@
 .v-data-table-header {
   background-color: black;
 }
+.disconnected {
+  border: 1px solid red !important;
+}
 .v-data-table {
   border: 1px solid wheat;
 }
@@ -55,6 +58,7 @@
 export default {
   name: "AlertTable",
   props: ["name"],
+  event: ["wserror"],
   data: () => ({
     headers: [
       { text: "Strategy" },
@@ -63,6 +67,7 @@ export default {
       { text: "Time" },
     ],
     wsconnection: undefined,
+    tableConnected: "elevation-1 disconnected",
   }),
 
   computed: {
@@ -74,20 +79,26 @@ export default {
   },
 
   mounted: function () {
+    this.$toast.warn("Connecting...");
     this.$store.commit("startAlertTimer", this.updateAlertsTimeOut);
     this.wsconnection = new WebSocket(this.$store.getters.wsURL);
-    if (this.wsconnection) {
-      this.wsconnection.onmessage = (event) => {
-        this.$store.commit("addAlert", JSON.parse(event.data));
-      };
-    } else {
-      console.log("Cannot open the WebSocket to: " + this.$store.getters.wsURL);
-    }
+    this.wsconnection.onmessage = (event) => {
+      this.$store.commit("addAlert", JSON.parse(event.data));
+    };
+    setTimeout(() => {
+      if (this.wsconnection.readyState !== WebSocket.OPEN) {
+        this.$toast.danger(
+          "Failed to connect to the backend service! Check your network!"
+        );
+      } else {
+        this.tableConnected = "elevation-1";
+      }
+    }, 5000);
   },
 
   beforeDestroy: function () {
     this.$store.commit("stopAlertTimer");
-    if (this.wsconnection) {
+    if (this.wsconnection.readyState == WebSocket.OPEN) {
       this.wsconnection.close();
     }
   },
