@@ -1,17 +1,6 @@
 // eslint-disable-next-line
 <template>
   <v-app-bar app color="primary">
-    <v-snackbar
-      :top="true"
-      :right="true"
-      :timeout="6000"
-      :isActive="toastVisible"
-    >
-      {{ toastMessage }}
-      <v-btn color="pink" text @click="$store.commit('clearToast')">
-        Close
-      </v-btn>
-    </v-snackbar>
     <div class="d-flex align-center">
       <v-img
         alt="Vuetify Logo"

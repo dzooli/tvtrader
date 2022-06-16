@@ -2,6 +2,7 @@
   <v-app>
     <NavBar />
     <v-main>
+      <v-toast />
       <router-view />
     </v-main>
   </v-app>
@@ -9,12 +10,13 @@
 
 <script>
 import NavBar from "@/components/NavBar.vue";
+import { VToast } from "vuetify-snackbar-toast";
 export default {
   name: "App",
   data() {
     return {};
   },
-  components: { NavBar },
+  components: { NavBar, VToast },
   beforeMount() {
     this.$store.commit(
       "initialize",

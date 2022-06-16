@@ -5,6 +5,7 @@ import router from "./router";
 import store from "./store";
 import vuetify from "./plugins/vuetify";
 import storage from "./plugins/localstorage";
+import toast from "vuetify-snackbar-toast";
 
 Vue.config.productionTip = false;
 Vue.prototype.$settings = new Vue({
@@ -18,6 +19,8 @@ Vue.prototype.$settings = new Vue({
     alerts: [],
   },
 });
+
+Vue.use(toast);
 
 new Vue({
   router,

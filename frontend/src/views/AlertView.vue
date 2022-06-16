@@ -40,19 +40,19 @@ export default {
         "Minimum 5 characters",
     ],
   }),
+
   methods: {
     addItem() {
-      this.$store.commit("setToast", "hello");
       let newAlert;
       try {
         newAlert = JSON.parse(this.message);
       } catch (error) {
-        console.log(error);
+        this.$toast.danger(error.toString());
         return;
       }
 
       this.$axios.post("/", newAlert).catch((error) => {
-        console.log(error);
+        this.$toast.danger(error.toString());
       });
     },
   },
