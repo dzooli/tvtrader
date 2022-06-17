@@ -1,3 +1,4 @@
+// eslint-ignore-next-line
 import Vue from "vue";
 import Vuex from "vuex";
 
@@ -28,7 +29,7 @@ export default new Vuex.Store({
       if (settings) {
         this.replaceState(Object.assign(state, settings));
       }
-      if (justvaribales == false) {
+      if (!justvaribales) {
         state.alerts = [];
         state.alertTimer = undefined;
       }
