@@ -1,6 +1,3 @@
-from threading import local
-from turtle import st
-from zoneinfo import ZoneInfo
 from sanic.log import logger
 from sanic_ext import openapi
 from sanic.response import json
@@ -42,7 +39,7 @@ AlertSchema = {
 @openapi.summary("Alert POST endpoint. This is the endpoint for the Chrome extension.")
 async def post(request):
     app = Sanic.get_app()
-    # Convert to JSON
+
     try:
         jsondata = js.loads(request.body.decode('utf-8').replace("'", '"'))
     except Exception as ex:
@@ -51,7 +48,7 @@ async def post(request):
         jsonschema.validate(jsondata, schema=AlertSchema)
     except Exception as ex:
         return json({"ERROR": str(ex)}, status=400)
-    # Format the alert and convert to local time
+
     try:
         local_time_zone = timezone(app.config.TIMEZONE)
         t = time.strptime(jsondata["timestamp"], '%Y-%m-%dT%H:%M:%SZ')
@@ -63,7 +60,7 @@ async def post(request):
         return json({"ERROR": str(ex)}, status=400)
     jsondata["timestamp"] = int(timestamp)
     jsondata["direction"] = jsondata["direction"].upper()
-    # Send to our connected websocket clients
+
     for iws in wsclients.copy():
         try:
             await iws.send(js.dumps(jsondata))
@@ -88,9 +85,14 @@ async def feed(request, ws):
             await ws.send(data)
 
 
-if __name__ == '__main__':
-    app.run(host="127.0.0.1",
-            port=app.config.PORT,
-            dev=app.config.DEV,
-            fast=not app.config.DEV,
-            access_log=app.config.DEV)
+if app.config.DEV:
+    if __name__ == '__main__':
+        app.run(host="127.0.0.1",
+                port=app.config.PORT,
+                dev=app.config.DEV,
+                fast=not app.config.DEV,
+                access_log=app.config.DEV,
+                workers=4)
+else:
+    print("Run this app with Uvicorn in production mode!")
+    exit()
