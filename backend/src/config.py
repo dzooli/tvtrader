@@ -1,12 +1,12 @@
-from ssl import ALERT_DESCRIPTION_DECODE_ERROR, ALERT_DESCRIPTION_DECOMPRESSION_FAILURE
 from sanic.config import Config
+from os import getenv
 
 
 class AppConfig(Config):
     APPNAME = "TradingView Trader"
     TIMEZONE = "Europe/Budapest"
     PORT = 8089
-    DEV = True
+    DEV = getenv("SANIC_DEV", "True") == "True"
     API_TITLE = "TvTrader API"
     API_VERSION = '1.0.0'
     API_DESCRIPTION = "TradingView alert helper API"
