@@ -36,17 +36,24 @@ export default new Vuex.Store({
     },
 
     addAlert(state, { stratId, stratName, symbol, direction, timestamp }) {
-      state.alerts.unshift({
-        stratId: stratId,
-        stratName: stratName,
-        symbol: symbol,
-        direction: direction,
-        timestamp: timestamp,
-        timedout:
-          Date.now() / 1000 - timestamp > state.alertTimeout * 60
-            ? true
-            : false,
-      });
+      let itemExists =
+        state.alerts.find(function (current) {
+          return current.timestamp == this;
+        }, timestamp) || undefined;
+      if (itemExists == undefined) {
+        state.alerts.unshift({
+          stratId: stratId,
+          stratName: stratName,
+          symbol: symbol,
+          direction: direction,
+          timestamp: timestamp,
+          timedout:
+            Date.now() / 1000 - timestamp > state.alertTimeout * 60
+              ? true
+              : false,
+        });
+      }
+      // Cut the list to max items
       if (state.alerts.length > state.maxAlerts) {
         state.alerts.splice(state.alerts.length - 1, 1);
       }
@@ -62,12 +69,10 @@ export default new Vuex.Store({
 
     startAlertTimer(state, func) {
       state.alertTimer = setInterval(func, state.alertUpdateTime * 1000);
-      console.log("alert timer started");
     },
 
     stopAlertTimer(state) {
       clearInterval(state.alertTimer);
-      console.log("alert timer stopped");
     },
 
     updateAlertsTimeOut(state) {
