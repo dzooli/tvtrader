@@ -9,7 +9,8 @@ from datetime import datetime
 from pytz import timezone
 import time
 
-from config import AppConfig
+from .config import AppConfig
+
 
 wsclients = set()
 app = Sanic("TvTrader", config=AppConfig(),
