@@ -13,7 +13,7 @@ class AppConfig(Config):
     API_CONTACT_EMAIL = "zoltan.dzooli.fabian@gmail.com"
     OAS_IGNORE_OPTIONS = False
     CORS = True
-    CORS_ORIGINS = "http://localhost:8080"
+    CORS_ORIGINS = "http://localhost:8080,https://www.tradingview.com"
     CORS_METHODS = "GET,POST,OPTIONS"
     CORS_AUTOMATIC_OPTIONS = True
     SWAGGER_UI_CONFIGURATION = {
