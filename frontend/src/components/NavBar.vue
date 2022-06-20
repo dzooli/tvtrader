@@ -23,9 +23,7 @@
 
     <v-spacer class="col-1"></v-spacer>
 
-    <v-btn text to="/" title="Alerts">
-      <v-icon>mdi-bell-alert-outline</v-icon>
-    </v-btn>
+    <v-btn text to="/" title="Alerts">Alerts</v-btn>
 
     <v-spacer></v-spacer>
 
