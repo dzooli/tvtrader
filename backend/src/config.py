@@ -3,10 +3,15 @@ from os import getenv
 
 
 class AppConfig(Config):
+    # User configurable values
+    DEV = getenv("TVTRADER_DEV", "False") == "True"
+    VERBOSE = getenv("TVTRADER_VERBOSE", "True") == "True"
+    GR_TIMEOUT = int(getenv("TVTRADER_ALERT_TIMEOUT", 15))
+    GR_ENABLED = getenv("TVTRADER_GRAFANA_SEND", "True") == "True"
+    TIMEZONE = getenv("TVTRADER_TIMEZONE", "Europe/Budapest")
+    # Internal configuration
     APPNAME = "TradingView Trader"
-    TIMEZONE = "Europe/Budapest"
     PORT = 8089
-    DEV = getenv("SANIC_DEV", "True") == "True"
     API_TITLE = "TvTrader API"
     API_VERSION = '1.0.0'
     API_DESCRIPTION = "TradingView alert helper API"
