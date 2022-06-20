@@ -3,6 +3,7 @@ from sanic_ext import openapi
 from sanic.response import json
 from sanic import Sanic
 
+from typing import Dict
 import json as js
 import jsonschema
 from datetime import datetime
@@ -10,6 +11,7 @@ from pytz import timezone
 import time
 
 from .config import AppConfig
+from .schemas.alerts import AlertSchema, ProcessedAlertSchema
 
 
 wsclients = set()
@@ -23,34 +25,24 @@ def check(request):
     return json("HEALTHY " + app.config.APPNAME)
 
 
-AlertSchema = {
-    "type": "object",
-    "required": ["stratId", "stratName", "symbol", "direction", "timestamp", "interval"],
-    "properties": {
-        "stratId":      {"type": "number", "minimum": 0},
-        "stratName":    {"type": "string"},
-        "symbol":       {"type": "string"},
-        "interval":     {"type": "number"},
-        "direction":    {"type": "string", "maxLength": 4},
-        "timestamp":    {"type": "string"}
-    }
-}
-
-
 @app.post("/")
 @openapi.summary("Alert POST endpoint. This is the endpoint for the Chrome extension.")
 async def post(request):
-    app = Sanic.get_app()
-
+    postData = request.body.decode('utf-8').replace("'", '"')
+    logger.debug("POST recv: " + postData)
+    # POST JSON decoding
     try:
-        jsondata = js.loads(request.body.decode('utf-8').replace("'", '"'))
+        jsondata = js.loads(postData)
     except Exception as ex:
+        logger.error(str(ex))
         return json({"ERROR": str(ex)}, status=400)
+    # JSON validation
     try:
         jsonschema.validate(jsondata, schema=AlertSchema)
     except Exception as ex:
+        logger.error(str(ex))
         return json({"ERROR": str(ex)}, status=400)
-
+    # Timestamp conversion
     try:
         local_time_zone = timezone(app.config.TIMEZONE)
         t = time.strptime(jsondata["timestamp"], '%Y-%m-%dT%H:%M:%SZ')
@@ -59,42 +51,61 @@ async def post(request):
         utc_offset = local_time_zone.utcoffset(dt).total_seconds()
         timestamp = dt.timestamp() + utc_offset
     except Exception as ex:
+        logger.error(str(ex))
         return json({"ERROR": str(ex)}, status=400)
     jsondata["timestamp"] = int(timestamp)
     jsondata["direction"] = jsondata["direction"].upper()
-
-    for iws in wsclients.copy():
-        try:
-            await iws.send(js.dumps(jsondata))
-            logger.info("POST data sent to WS: " + js.dumps(jsondata))
-        except Exception as ex:
-            logger.error("Failed to send the alert via WS! " + str(ex))
-            wsclients.remove(iws)
+    # Send to Websockets
+    await actionWebsocketSend(jsondata)
+    # Send to Carbon
+    await actionCarbonSend(jsondata, utc_offset)
+    # Send response
     return json("OK")
 
 
 @ app.websocket("/alerts")
 async def feed(request, ws):
-    app = Sanic.get_app()
-    logger.info("ws request: " + str(request))
+    logger.debug("ws request: " + str(request))
     wsclients.add(ws)
     while True:
         data = None
         data = await ws.recv()
         if data is not None:
-            if app.config.DEV:
-                logger.info("ws data received: " + str(data))
+            logger.debug("ws data received: " + str(data))
             await ws.send(data)
 
 
-if app.config.DEV:
-    if __name__ == '__main__':
-        app.run(host="127.0.0.1",
-                port=app.config.PORT,
-                dev=app.config.DEV,
-                fast=not app.config.DEV,
-                access_log=app.config.DEV,
-                workers=4)
-else:
-    print("Run this app with Uvicorn in production mode!")
-    exit()
+async def actionWebsocketSend(jsondata: Dict):
+    for iws in wsclients.copy():
+        try:
+            await iws.send(js.dumps(jsondata))
+        except Exception as ex:
+            logger.error("Failed to send the alert via WS! " + str(ex))
+            wsclients.remove(iws)
+
+
+async def actionCarbonSend(jsondata: Dict, utc_offset: int):
+    # Validation
+    try:
+        jsonschema.validate(jsondata, schema=ProcessedAlertSchema)
+    except Exception as ex:
+        logger.error("CarbonSend JSON validation error: " + str(ex))
+        return
+    # Alert timeout calculation
+    config = Sanic.get_app().config
+    value = 15 if jsondata["direction"] == "SELL" else 85
+    timediff = int(time.time()) - (jsondata["timestamp"] - utc_offset)
+    if timediff > (config.GR_TIMEOUT * 60):
+        value = 50
+    # Message prepare
+    msg = f'strat.{jsondata["stratName"]}.{jsondata["interval"]}.{jsondata["symbol"]} {value} {jsondata["timestamp"]}\n'
+    logger.debug("Carbon message: " + msg)
+
+
+if __name__ == '__main__':
+    app.run(host="127.0.0.1",
+            port=app.config.PORT,
+            dev=app.config.DEV,
+            fast=not app.config.DEV,
+            access_log=app.config.DEV,
+            )
