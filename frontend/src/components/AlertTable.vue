@@ -79,17 +79,27 @@ export default {
   },
 
   mounted: function () {
-    this.$toast.warn("Connecting...");
+    this.$toast.warn("Connecting to the backend...");
     this.$store.commit("startAlertTimer", this.updateAlertsTimeOut);
     this.wsconnection = new WebSocket(this.$store.getters.wsURL);
     this.wsconnection.onmessage = (event) => {
       this.$store.commit("addAlert", JSON.parse(event.data));
     };
+    this.wsconnection.onclose = () => {
+      if (this.$route.name === "alerts") {
+        this.$toast.danger(
+          "Backend disconnected! Fix the issue and reload the page!",
+          { timeout: -1 }
+        );
+        this.tableConnected = "elevation-1 disconnected";
+      }
+    };
     setTimeout(() => {
       if (this.wsconnection.readyState !== WebSocket.OPEN) {
         this.$toast.danger(
-          "Failed to connect to the backend service! Check your network!"
+          "Failed to connect to the backend service! Fix the issue and reload the page!"
         );
+        this.tableConnected = "elevation-1 disconnected";
       } else {
         this.tableConnected = "elevation-1";
       }
