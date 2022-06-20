@@ -4,7 +4,19 @@ Content-Type: application/json
 {
     "stratId": 0,
     "stratName": "HELLO",
-    "symbol": "GBPUSD",
+    "symbol": "FXCM:GBPUSD",
+    "interval": 15,
+    "direction": "SELL",
+    "timestamp": "2019-08-27T09:56:00Z"
+}
+###
+POST http://localhost:8089/
+Content-Type: application/json
+
+{
+    "stratId": 0,
+    "stratName": "HELLO",
+    "symbol": "FXCM:GBPUSD",
     "direction": "SELL",
     "timestamp": "2019-08-27T09:56:00Z"
 }
