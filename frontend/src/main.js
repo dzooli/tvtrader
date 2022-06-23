@@ -15,7 +15,7 @@ Vue.prototype.$settings = new Vue({
     alertUpdateTime: 5, // timeout update interval in seconds
     alertTimer: undefined,
     maxAlerts: 10,
-    wsURL: process.env.WEBSOCKET_URL || "ws://localhost:8089/alerts",
+    wsURL: process.env.WEBSOCKET_URL || "ws://localhost:8089/wsalerts",
     alerts: [],
   },
 });
