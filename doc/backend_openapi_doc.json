@@ -1,0 +1,138 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "TvTrader API",
+        "version": "1.0.0",
+        "description": "TradingView alert helper API",
+        "contact": {
+            "email": "zoltan.dzooli.fabian@gmail.com"
+        }
+    },
+    "paths": {
+        "/": {
+            "get": {
+                "operationId": "get~check",
+                "summary": "Healthcheck endpoint",
+                "responses": {
+                    "default": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/alert": {
+            "post": {
+                "operationId": "carbonAlert",
+                "summary": "Alert POST endpoint to proxy the alerts to the frontend application.\"",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "description": "JSON encoded alert",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "stratId"
+                            ],
+                            "properties": {
+                                "stratId": {
+                                    "type": "number"
+                                },
+                                "stratName": {
+                                    "type": "string"
+                                },
+                                "symbol": {
+                                    "type": "string"
+                                },
+                                "direction": {
+                                    "type": "string",
+                                    "description": "Direction of the alerted trade opportunity"
+                                },
+                                "interval": {
+                                    "type": "string",
+                                    "description": "The resolution of the chart"
+                                },
+                                "timestamp": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Everything is ok"
+                    },
+                    "400": {
+                        "description": "Some error happened. See the ERROR porperty of the response object."
+                    }
+                }
+            }
+        },
+        "/carbon-alert": {
+            "post": {
+                "operationId": "carbonAlert",
+                "summary": "Alert POST endpoint to proxy the alerts to a Carbon server.\"",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "description": "JSON encoded alert",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "stratId"
+                            ],
+                            "properties": {
+                                "stratId": {
+                                    "type": "number"
+                                },
+                                "stratName": {
+                                    "type": "string"
+                                },
+                                "symbol": {
+                                    "type": "string"
+                                },
+                                "direction": {
+                                    "type": "string"
+                                },
+                                "interval": {
+                                    "type": "string",
+                                    "description": "The resolution of the chart"
+                                },
+                                "timestamp": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Everything is ok"
+                    },
+                    "400": {
+                        "description": "Some error happened. See the ERROR porperty of the response object."
+                    }
+                }
+            }
+        },
+        "/wsalerts": {
+            "get": {
+                "operationId": "get~feed",
+                "summary": "partial(func, *args, **keywords) - new function with partial application",
+                "description": "of the given arguments and keywords.",
+                "responses": {
+                    "default": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [],
+    "servers": [],
+    "security": []
+}
