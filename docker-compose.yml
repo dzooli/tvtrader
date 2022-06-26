@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  grafana:
+    image: grafana/grafana-oss
+    environment:
+      GF_INSTALL_IMAGE_RENDERER_PLUGIN: true
+    ports:
+      - "8030:3000"
+    depends_on:
+      - graphite
+  graphite:
+    image: graphiteapp/graphite-statsd
+    ports:
+      - '2003:2003'
+
