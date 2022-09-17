@@ -2,7 +2,6 @@ from sanic.log import logger
 from sanic_ext import openapi
 from sanic.response import json
 from sanic import Sanic
-
 from typing import Dict
 import json as js
 import jsonschema
@@ -11,7 +10,7 @@ from pytz import timezone
 import time
 
 from .config import AppConfig
-from .schemas.alerts import AlertSchema
+from .schemas.alerts import TradingViewAlert
 
 
 wsclients = set()
@@ -28,7 +27,7 @@ def check(request):
 @ app.post("/alert")
 async def alert_post(request):
     """
-    Alert POST endpoint to proxy the alerts to the frontend application."
+    Alert POST endpoint to proxy the alerts to the frontend application.
 
     openapi:
     ---
@@ -42,6 +41,11 @@ async def alert_post(request):
           type: object
           required:
             - stratId
+            - stratName
+            - symbol
+            - direction
+            - interval
+            - timestamp
           properties:
             stratId:
               type: number
@@ -65,18 +69,18 @@ async def alert_post(request):
     """
     try:
         jsondata = get_jsondata(request)
-        validate_post(jsondata, AlertSchema)
+        validate_post(jsondata, TradingViewAlert)
         fix_jsondata(jsondata)
     except Exception as ex:
         return json({"ERROR": str(ex)}, status=400)
-    await actionWebsocketSend(jsondata)
+    await action_ws_send(jsondata)
     return json("OK")
 
 
 @ app.post("/carbon-alert")
 async def carbon_alert_post(request):
     """
-    Alert POST endpoint to proxy the alerts to a Carbon server."
+    Alert POST endpoint to proxy the alerts to a Carbon server.
 
     openapi:
     ---
@@ -90,6 +94,11 @@ async def carbon_alert_post(request):
           type: object
           required:
             - stratId
+            - stratName
+            - symbol
+            - direction
+            - interval
+            - timestamp
           properties:
             stratId:
               type: number
@@ -112,7 +121,7 @@ async def carbon_alert_post(request):
     """
     try:
         jsondata = get_jsondata(request)
-        validate_post(jsondata, AlertSchema)
+        validate_post(jsondata, TradingViewAlert)
         fix_jsondata(jsondata)
     except Exception as ex:
         return json({"ERROR": str(ex)}, status=400)
@@ -131,6 +140,13 @@ async def carbon_alert_post(request):
 
 @ app.websocket("/wsalerts")
 async def feed(request, ws):
+    """
+        Websocket endpoint for the connected clients.
+
+        openapi:
+        ---
+        operationId: alertWebsocket
+    """
     logger.debug("ws request: " + str(request))
     wsclients.add(ws)
     while True:
@@ -141,7 +157,7 @@ async def feed(request, ws):
             await ws.send(data)
 
 
-async def actionWebsocketSend(jsondata: Dict):
+async def action_ws_send(jsondata: Dict):
     for iws in wsclients.copy():
         try:
             await iws.send(js.dumps(jsondata))
@@ -151,10 +167,10 @@ async def actionWebsocketSend(jsondata: Dict):
 
 
 def get_jsondata(request):
-    postData = request.body.decode('utf-8').replace("'", '"')
-    logger.debug("POST recv: " + postData)
+    post_data = request.body.decode('utf-8').replace("'", '"')
+    logger.debug("POST recv: " + post_data)
     try:
-        jsondata = js.loads(postData)
+        jsondata = js.loads(post_data)
     except Exception as ex:
         logger.error(str(ex))
         raise ex
