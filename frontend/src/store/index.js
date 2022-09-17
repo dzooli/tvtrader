@@ -25,11 +25,11 @@ export default new Vuex.Store({
   },
 
   mutations: {
-    initialize(state, settings, justvaribales) {
+    initialize(state, settings, removealerts) {
       if (settings) {
         this.replaceState(Object.assign(state, settings));
       }
-      if (!justvaribales) {
+      if (removealerts) {
         state.alerts = [];
         state.alertTimer = undefined;
       }
