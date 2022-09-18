@@ -1,12 +1,41 @@
-AlertSchema = {
-    "type": "object",
-    "required": ["stratId", "stratName", "symbol", "direction", "timestamp", "interval"],
-    "properties": {
-        "stratId":      {"type": "number", "minimum": 0},
-        "stratName":    {"type": "string"},
-        "symbol":       {"type": "string"},
-        "interval":     {"type": "number"},
-        "direction":    {"type": "string", "maxLength": 4},
-        "timestamp":    {"type": "string"}
-    }
-}
+from attrs import define, validators, field
+
+
+@define
+class TradingViewAlert:
+    stratId: int = field(
+        validator=[
+            validators.instance_of(int),
+            validators.ge(0)
+        ]
+    )
+    stratName: str = field(
+        validator=[
+            validators.instance_of(str),
+            validators.min_len(1)
+        ]
+    )
+    symbol: str = field(
+        validator=[
+            validators.instance_of(str),
+            validators.min_len(1)
+        ]
+    )
+    interval: int = field(
+        validator=[
+            validators.instance_of(int),
+            validators.ge(1)
+        ]
+    )
+    direction: str = field(
+        validator=[
+            validators.instance_of(str),
+            validators.in_(["BUY", "SELL"])
+        ]
+    )
+    timestamp: str = field(
+        validator=[
+            validators.instance_of(str),
+            validators.min_len(1)
+        ]
+    )

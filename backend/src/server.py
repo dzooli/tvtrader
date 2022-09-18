@@ -1,10 +1,11 @@
 from sanic.log import logger
 from sanic_ext import openapi
+from sanic_ext import validate
 from sanic.response import json
 from sanic import Sanic
 from typing import Dict
+import attrs
 import json as js
-import jsonschema
 from datetime import datetime
 from pytz import timezone
 import time
@@ -24,8 +25,9 @@ def check(request):
     return json("HEALTHY " + app.config.APPNAME)
 
 
-@ app.post("/alert")
-async def alert_post(request):
+@app.post("/alert")
+@validate(json=TradingViewAlert)
+async def alert_post(request, body: TradingViewAlert):
     """
     Alert POST endpoint to proxy the alerts to the frontend application.
 
@@ -68,8 +70,7 @@ async def alert_post(request):
           description: Some error happened. See the ERROR porperty of the response object.
     """
     try:
-        jsondata = get_jsondata(request)
-        validate_post(jsondata, TradingViewAlert)
+        jsondata = attrs.asdict(body)
         fix_jsondata(jsondata)
     except Exception as ex:
         return json({"ERROR": str(ex)}, status=400)
@@ -77,8 +78,9 @@ async def alert_post(request):
     return json("OK")
 
 
-@ app.post("/carbon-alert")
-async def carbon_alert_post(request):
+@app.post("/carbon-alert")
+@validate(json=TradingViewAlert)
+async def carbon_alert_post(request, body: TradingViewAlert):
     """
     Alert POST endpoint to proxy the alerts to a Carbon server.
 
@@ -120,8 +122,7 @@ async def carbon_alert_post(request):
           description: Some error happened. See the ERROR porperty of the response object.
     """
     try:
-        jsondata = get_jsondata(request)
-        validate_post(jsondata, TradingViewAlert)
+        jsondata = attrs.asdict(body)
         fix_jsondata(jsondata)
     except Exception as ex:
         return json({"ERROR": str(ex)}, status=400)
@@ -138,7 +139,7 @@ async def carbon_alert_post(request):
     return json("OK")
 
 
-@ app.websocket("/wsalerts")
+@app.websocket("/wsalerts")
 async def feed(request, ws):
     """
         Websocket endpoint for the connected clients.
@@ -164,25 +165,6 @@ async def action_ws_send(jsondata: Dict):
         except Exception as ex:
             logger.error("Failed to send the alert via WS! " + str(ex))
             wsclients.remove(iws)
-
-
-def get_jsondata(request):
-    post_data = request.body.decode('utf-8').replace("'", '"')
-    logger.debug("POST recv: " + post_data)
-    try:
-        jsondata = js.loads(post_data)
-    except Exception as ex:
-        logger.error(str(ex))
-        raise ex
-    return jsondata
-
-
-def validate_post(jsondata: Dict, schema: Dict):
-    try:
-        jsonschema.validate(jsondata, schema=schema)
-    except Exception as ex:
-        logger.error(str(ex))
-        raise ex
 
 
 def fix_jsondata(jsondata: Dict):
