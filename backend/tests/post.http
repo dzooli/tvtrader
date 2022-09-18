@@ -1,4 +1,4 @@
-POST http://localhost:8089/
+POST http://localhost:8089/alert
 Content-Type: application/json
 
 {
@@ -10,7 +10,7 @@ Content-Type: application/json
     "timestamp": "2019-08-27T09:56:00Z"
 }
 ###
-POST http://localhost:8089/
+POST http://localhost:8089/alert
 Content-Type: application/json
 
 {
@@ -21,7 +21,7 @@ Content-Type: application/json
     "timestamp": "2019-08-27T09:56:00Z"
 }
 ###
-POST http://localhost:8089/
+POST http://localhost:8089/alert
 Content-Type: application/json
 
 {}
