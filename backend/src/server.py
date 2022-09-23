@@ -15,6 +15,7 @@ import socket
 
 from .config import AppConfig
 from .schemas.alerts import TradingViewAlert
+from .actions.carbon import send_metric
 
 
 class TvTraderContext(SimpleNamespace):
@@ -164,7 +165,7 @@ async def carbon_alert_post(request, body: TradingViewAlert):
     # Message prepare
     msg = f'strat.{jsondata["stratName"]}.{jsondata["interval"]}.{jsondata["symbol"]} {value} {jsondata["timestamp"]}\n'
     logger.debug("Carbon message: " + msg)
-    await action_carbon_send(msg)
+    await send_metric(msg)
     return json("OK")
 
 
@@ -190,17 +191,6 @@ async def action_ws_send(jsondata: Dict):
         except Exception as ex:
             logger.error("Failed to send the alert via WS! " + str(ex))
             wsclients.remove(iws)
-
-
-async def action_carbon_send(metric):
-    logger.info("Carbon send action...")
-    app = Sanic.get_app()
-    sock = app.ctx.carbon_sock
-    if isinstance(sock, socket.socket):
-        sock.send(bytes(metric.encode()))
-        logger.info(f"{metric} sent to Carbon")
-    else:
-        logger.error("Cannot send alert to Carbon")
 
 
 def fix_jsondata(jsondata: Dict):
