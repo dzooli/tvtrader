@@ -227,6 +227,11 @@ def fix_jsondata(jsondata: Dict):
 
 @app.after_server_stop
 def teardown():
+    """
+    Application shutdown
+
+    Does the cleanup after server shutdown
+    """
     logger.debug("Closing the Carbon socket...")
     sock = Sanic.get_app().ctx.carbon_sock
     if isinstance(sock, socket.socket):
