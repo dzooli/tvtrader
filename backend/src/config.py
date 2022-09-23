@@ -28,3 +28,5 @@ class AppConfig(Config):
         "operationsSorter": "alpha",
     }
     WS_URL = "ws://localhost:" + str(PORT) + "/alerts"
+    CARBON_HOST = "localhost"
+    CARBON_PORT = 2003

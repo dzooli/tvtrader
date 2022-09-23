@@ -1,3 +1,5 @@
+from multiprocessing import context
+from types import SimpleNamespace
 from sanic.log import logger
 from sanic_ext import openapi
 from sanic_ext import validate
@@ -9,14 +11,40 @@ import json as js
 from datetime import datetime
 from pytz import timezone
 import time
+import socket
 
 from .config import AppConfig
 from .schemas.alerts import TradingViewAlert
 
 
+class TvTraderContext(SimpleNamespace):
+    _carbon_sock = None
+
+    def __init__(self, **kwargs: any) -> None:
+        super().__init__(**kwargs)
+
+    @property
+    def carbon_sock(self):
+        return self._carbon_sock
+
+    @carbon_sock.setter
+    def carbon_sock(self, sock: socket.socket) -> None:
+        self._carbon_sock = sock
+
+    @carbon_sock.deleter
+    def carbon_sock(self):
+        self._carbon_sock.close()
+        del self._carbon_sock
+
+
 wsclients = set()
+
+carbon_connection = socket.create_connection(
+    (AppConfig.CARBON_HOST, AppConfig.CARBON_PORT))
+appctx = TvTraderContext()
+appctx.carbon_sock = carbon_connection
 app = Sanic("TvTrader", config=AppConfig(),
-            configure_logging=True, )
+            configure_logging=True, ctx=appctx)
 
 
 @app.get("/")
@@ -136,6 +164,7 @@ async def carbon_alert_post(request, body: TradingViewAlert):
     # Message prepare
     msg = f'strat.{jsondata["stratName"]}.{jsondata["interval"]}.{jsondata["symbol"]} {value} {jsondata["timestamp"]}\n'
     logger.debug("Carbon message: " + msg)
+    await action_carbon_send(msg)
     return json("OK")
 
 
@@ -143,10 +172,6 @@ async def carbon_alert_post(request, body: TradingViewAlert):
 async def feed(request, ws):
     """
         Websocket endpoint for the connected clients.
-
-        openapi:
-        ---
-        operationId: alertWebsocket
     """
     logger.debug("ws request: " + str(request))
     wsclients.add(ws)
@@ -165,6 +190,17 @@ async def action_ws_send(jsondata: Dict):
         except Exception as ex:
             logger.error("Failed to send the alert via WS! " + str(ex))
             wsclients.remove(iws)
+
+
+async def action_carbon_send(metric):
+    logger.info("Carbon send action...")
+    app = Sanic.get_app()
+    sock = app.ctx.carbon_sock
+    if isinstance(sock, socket.socket):
+        sock.send(bytes(metric.encode()))
+        logger.info(f"{metric} sent to Carbon")
+    else:
+        logger.error("Cannot send alert to Carbon")
 
 
 def fix_jsondata(jsondata: Dict):
@@ -187,6 +223,17 @@ def fix_jsondata(jsondata: Dict):
     jsondata["utcoffset"] = utc_offset
     jsondata["timestamp"] = int(timestamp)
     jsondata["direction"] = jsondata["direction"].upper()
+
+
+@app.after_server_stop
+def teardown():
+    logger.debug("Closing the Carbon socket...")
+    sock = Sanic.get_app().ctx.carbon_sock
+    if isinstance(sock, socket.socket):
+        sock.shutdown()
+        sock.close()
+    else:
+        logger.error("Carbon socket was not closed properly!")
 
 
 if __name__ == '__main__':

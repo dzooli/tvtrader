@@ -12,7 +12,6 @@ class TradingViewAlert:
     stratName: str = field(
         validator=[
             validators.instance_of(str),
-            validators.min_len(1)
         ]
     )
     symbol: str = field(
@@ -36,6 +35,6 @@ class TradingViewAlert:
     timestamp: str = field(
         validator=[
             validators.instance_of(str),
-            validators.min_len(1)
+            validators.min_len(10)
         ]
     )
