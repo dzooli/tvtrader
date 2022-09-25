@@ -159,7 +159,11 @@ async def carbon_alert_post(request, body: TradingViewAlert):
     config = Sanic.get_app().config
     value = 15 if jsondata["direction"] == "SELL" else 85
     timediff = int(time.time()) - \
-        (jsondata["timestamp"] - jsondata["utcoffset"])
+        (jsondata["timestamp"] + jsondata["utcoffset"])
+    logger.debug(
+        "timediff: " + str(timediff)
+        + " utcoffset: " + str(jsondata["utcoffset"]))
+    logger.debug(jsondata, stack_info=False)
     if timediff > (config.GR_TIMEOUT * 60):
         value = 50
     # Message prepare
