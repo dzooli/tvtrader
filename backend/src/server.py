@@ -157,7 +157,7 @@ async def carbon_alert_post(request, body: TradingViewAlert):
         return json({"ERROR": str(ex)}, status=400)
     # Message meaning conversion to numbers
     config = Sanic.get_app().config
-    value = 15 if jsondata["direction"] == "SELL" else 85
+    value = config.CARBON_SELL_VALUE if jsondata["direction"] == "SELL" else config.CARBON_BUY_VALUE
     timediff = int(time.time()) - \
         (jsondata["timestamp"] + jsondata["utcoffset"])
     logger.debug(
@@ -165,7 +165,7 @@ async def carbon_alert_post(request, body: TradingViewAlert):
         + " utcoffset: " + str(jsondata["utcoffset"]))
     logger.debug(jsondata, stack_info=False)
     if timediff > (config.GR_TIMEOUT * 60):
-        value = 50
+        value = int((config.CARBON_SELL_VALUE + config.CARBON_BUY_VALUE) / 2)
     # Message prepare
     msg = f'strat.{jsondata["stratName"]}.{jsondata["interval"]}.{jsondata["symbol"]} {value} {jsondata["timestamp"]}\n'
     logger.debug("Carbon message: " + msg)
