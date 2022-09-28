@@ -3,11 +3,11 @@ Content-Type: application/json
 
 {
     "stratId": 0,
-    "stratName": "HELLO",
+    "stratName": "EMARSI",
     "symbol": "FXCM:GBPUSD",
     "interval": 15,
     "direction": "SELL",
-    "timestamp": "2022-09-21T20:56:00Z"
+    "timestamp": "2022-09-27T20:24:00Z"
 }
 ###
 
@@ -16,7 +16,7 @@ Content-Type: application/json
 
 {
     "stratId": 0,
-    "stratName": "HELLO",
+    "stratName": "EMARSI",
     "symbol": "FXCM:GBPUSD",
     "direction": "SELL",
     "timestamp": "2019-08-27T09:56:00Z"
