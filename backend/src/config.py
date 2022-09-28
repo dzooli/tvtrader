@@ -30,3 +30,5 @@ class AppConfig(Config):
     WS_URL = "ws://localhost:" + str(PORT) + "/alerts"
     CARBON_HOST = "localhost"
     CARBON_PORT = 2003
+    CARBON_SELL_VALUE: int = -35
+    CARBON_BUY_VALUE: int = 35
