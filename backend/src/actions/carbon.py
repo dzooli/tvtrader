@@ -19,11 +19,11 @@ async def send_metric(metric) -> None:
     Returns:
         None
     """
-    logger.info("Carbon send action...")
+    logger.debug("Carbon send action...")
     app = Sanic.get_app()
     sock = app.ctx.carbon_sock
     if isinstance(sock, socket.socket):
         sock.send(bytes(metric.encode()))
-        logger.info(f"{metric} sent to Carbon")
+        logger.debug(f"{metric} sent to Carbon")
     else:
         logger.error("Cannot send alert to Carbon")
