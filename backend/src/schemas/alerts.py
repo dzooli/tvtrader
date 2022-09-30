@@ -50,7 +50,6 @@ class TradingViewAlertSchema:
         description="Symbol for the alert", required=True, example="GBPUSD")
     interval = openapi.Integer(
         description="Strategy operational timeframe", required=True, example=15)
-    #direction = list(["BUY", "SELL"])
     direction = openapi.String(description="Strategy direction",
                                oneOf=["BUY", "SELL"], required=True)
     timestamp = openapi.DateTime(
