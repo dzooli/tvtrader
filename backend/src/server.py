@@ -123,7 +123,7 @@ def teardown():
     sock = Sanic.get_app().ctx.carbon_sock
     try:
         del sock
-    except:
+    except Exception:
         logger.error("Carbon connection close failed!")
 
 
