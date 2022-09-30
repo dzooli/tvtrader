@@ -42,7 +42,7 @@ if argno > 2:
     if argv[3] is not None:
         try:
             time_before = int(argv[3])
-        except:
+        except ValueError:
             print("Time value must be an integer!")
             exit(1)
 
@@ -58,7 +58,7 @@ print(sendtime)
 print(data)
 try:
     response = requests.post(post_url, json=data, verify=True, timeout=3)
-except:
+except ValueError:
     print("Connection error")
     exit(2)
 print(response.json())
