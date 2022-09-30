@@ -57,7 +57,7 @@ data['timestamp'] = sendtime.strftime('%Y-%m-%dT%H:%M:%SZ')
 print(sendtime)
 print(data)
 try:
-    response = requests.post(post_url, json=data, verify=False, timeout=3)
+    response = requests.post(post_url, json=data, verify=True, timeout=3)
 except:
     print("Connection error")
     exit(2)

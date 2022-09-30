@@ -21,8 +21,4 @@ toml
 utility
 uvicorn
 websockets
-urllib3
-charset_normalizer
-idna
-certifi
 requests
