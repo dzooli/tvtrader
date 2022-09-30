@@ -30,7 +30,7 @@ class TradingViewAlert:
     direction: str = field(
         validator=[
             validators.instance_of(str),
-            validators.in_(["BUY", "SELL"])
+            validators.in_(["BUY", "SELL", "buy", "sell"])
         ]
     )
     timestamp: str = field(
