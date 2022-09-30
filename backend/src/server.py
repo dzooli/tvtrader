@@ -1,4 +1,3 @@
-from multiprocessing import context
 from types import SimpleNamespace
 from sanic.log import logger
 from sanic_ext import openapi
@@ -14,7 +13,7 @@ import time
 import socket
 
 from .config import AppConfig
-from .schemas.alerts import TradingViewAlert
+from .schemas.alerts import TradingViewAlert, TradingViewAlertSchema
 from .actions.carbon import send_metric
 
 
@@ -34,14 +33,20 @@ class TvTraderContext(SimpleNamespace):
 
     @carbon_sock.deleter
     def carbon_sock(self):
+        self._carbon_sock.shutdown()
         self._carbon_sock.close()
         del self._carbon_sock
 
 
 wsclients = set()
 
-carbon_connection = socket.create_connection(
-    (AppConfig.CARBON_HOST, AppConfig.CARBON_PORT))
+carbon_connection = None
+try:
+    carbon_connection = socket.create_connection(
+        (AppConfig.CARBON_HOST, AppConfig.CARBON_PORT))
+except ConnectionRefusedError:
+    logger.error("[ERROR] Carbon connection is not available.")
+
 appctx = TvTraderContext()
 appctx.carbon_sock = carbon_connection
 app = Sanic("TvTrader", config=AppConfig(),
@@ -49,58 +54,32 @@ app = Sanic("TvTrader", config=AppConfig(),
 
 
 @app.get("/")
+@openapi.tag("backend")
 @openapi.summary("Healthcheck endpoint")
 def check(request):
     return json("HEALTHY " + app.config.APPNAME)
 
 
 @app.post("/alert")
+@openapi.tag("frontend")
+@openapi.operation("frontendAlert")
+@openapi.body({
+    "application/json": TradingViewAlertSchema},
+    description="Alert from TradingView forwarded to the frontend",
+    required=True,
+    name="data",
+)
+@openapi.response(200, "OK", description='Success')
+@openapi.response(400, description="Error occurred. See ERROR property in the response")
 @validate(json=TradingViewAlert)
 async def alert_post(request, body: TradingViewAlert):
     """
     Alert POST endpoint to proxy the alerts to the frontend application.
-
-    openapi:
-    ---
-    operationId: carbonAlert
-    parameters:
-      - name: data
-        in: body
-        description: JSON encoded alert
-        required: true
-        schema:
-          type: object
-          required:
-            - stratId
-            - stratName
-            - symbol
-            - direction
-            - interval
-            - timestamp
-          properties:
-            stratId:
-              type: number
-            stratName:
-              type: string
-            symbol:
-              type: string
-            direction:
-              type: string
-              description: Direction of the alerted trade opportunity
-            interval:
-              type: string
-              description: The resolution of the chart
-            timestamp:
-              type: string
-    responses:
-        '200':
-          description: Everything is ok
-        '400':
-          description: Some error happened. See the ERROR porperty of the response object.
     """
     try:
         jsondata = attrs.asdict(body)
-        fix_jsondata(jsondata)
+        add_timezone_info(jsondata)
+        format_json_input(jsondata)
     except Exception as ex:
         return json({"ERROR": str(ex)}, status=400)
     await action_ws_send(jsondata)
@@ -108,51 +87,25 @@ async def alert_post(request, body: TradingViewAlert):
 
 
 @app.post("/carbon-alert")
+@openapi.tag("backend")
+@openapi.operation("carbonAlert")
+@openapi.body({
+    "application/json": TradingViewAlertSchema},
+    description="Alert from TradingView forwarded to Carbon",
+    required=True,
+    name="data"
+)
+@openapi.response(200, "OK", description='Success')
+@openapi.response(400, description="Error occurred. See ERROR property in the response")
 @validate(json=TradingViewAlert)
 async def carbon_alert_post(request, body: TradingViewAlert):
     """
-    Alert POST endpoint to proxy the alerts to a Carbon server.
-
-    openapi:
-    ---
-    operationId: carbonAlert
-    parameters:
-      - name: data
-        in: body
-        description: JSON encoded alert
-        required: true
-        schema:
-          type: object
-          required:
-            - stratId
-            - stratName
-            - symbol
-            - direction
-            - interval
-            - timestamp
-          properties:
-            stratId:
-              type: number
-            stratName:
-              type: string
-            symbol:
-              type: string
-            direction:
-              type: string
-            interval:
-              type: string
-              description: The resolution of the chart
-            timestamp:
-              type: string
-    responses:
-        '200':
-          description: Everything is ok
-        '400':
-          description: Some error happened. See the ERROR porperty of the response object.
+        Alert POST endpoint to forward the alerts to a Carbon server.
     """
     try:
         jsondata = attrs.asdict(body)
-        fix_jsondata(jsondata)
+        add_timezone_info(jsondata)
+        format_json_input(jsondata)
     except Exception as ex:
         return json({"ERROR": str(ex)}, status=400)
     # Message meaning conversion to numbers
@@ -160,15 +113,10 @@ async def carbon_alert_post(request, body: TradingViewAlert):
     value = config.CARBON_SELL_VALUE if jsondata["direction"] == "SELL" else config.CARBON_BUY_VALUE
     timediff = int(time.time()) - \
         (jsondata["timestamp"] + jsondata["utcoffset"])
-    logger.debug(
-        "timediff: " + str(timediff)
-        + " utcoffset: " + str(jsondata["utcoffset"]))
-    logger.debug(jsondata, stack_info=False)
     if timediff > (config.GR_TIMEOUT * 60):
         value = int((config.CARBON_SELL_VALUE + config.CARBON_BUY_VALUE) / 2)
     # Message prepare
     msg = f'strat.{jsondata["stratName"]}.{jsondata["interval"]}.{jsondata["symbol"]} {value} {jsondata["timestamp"]}\n'
-    logger.debug("Carbon message: " + msg)
     await send_metric(msg)
     return json("OK")
 
@@ -197,8 +145,10 @@ async def action_ws_send(jsondata: Dict):
             wsclients.remove(iws)
 
 
-def fix_jsondata(jsondata: Dict):
+def add_timezone_info(jsondata: Dict):
     """
+        Fixing the JSON data
+
         Converts the timestamp string given in UTC string to
         a local timezone based timestamp given in seconds.
         Also converts the direction field to uppercase and appends
@@ -216,23 +166,30 @@ def fix_jsondata(jsondata: Dict):
         raise ex
     jsondata["utcoffset"] = utc_offset
     jsondata["timestamp"] = int(timestamp)
+
+
+def format_json_input(jsondata: Dict):
+    """
+        Data format processing
+
+        - strategy direction conversion to uppercase
+    """
     jsondata["direction"] = jsondata["direction"].upper()
 
 
 @app.after_server_stop
 def teardown():
     """
-    Application shutdown
+        Application shutdown
 
-    Does the cleanup after server shutdown
+        Cleanup after server shutdown.
     """
     logger.debug("Closing the Carbon socket...")
     sock = Sanic.get_app().ctx.carbon_sock
-    if isinstance(sock, socket.socket):
-        sock.shutdown()
-        sock.close()
-    else:
-        logger.error("Carbon socket was not closed properly!")
+    try:
+        del sock
+    except:
+        logger.error("Carbon connection close failed!")
 
 
 if __name__ == '__main__':
