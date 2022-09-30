@@ -1,45 +1,21 @@
-from types import SimpleNamespace
 from sanic.log import logger
 from sanic_ext import openapi
 from sanic_ext import validate
 from sanic.response import json
 from sanic import Sanic
-from typing import Dict
-import attrs
-import json as js
-from datetime import datetime
-from pytz import timezone
 import time
 import socket
+import attrs
 
-from .config import AppConfig
-from .schemas.alerts import TradingViewAlert, TradingViewAlertSchema
-from .actions.carbon import send_metric
-
-
-class TvTraderContext(SimpleNamespace):
-    _carbon_sock = None
-
-    def __init__(self, **kwargs: any) -> None:
-        super().__init__(**kwargs)
-
-    @property
-    def carbon_sock(self):
-        return self._carbon_sock
-
-    @carbon_sock.setter
-    def carbon_sock(self, sock: socket.socket) -> None:
-        self._carbon_sock = sock
-
-    @carbon_sock.deleter
-    def carbon_sock(self):
-        self._carbon_sock.shutdown()
-        self._carbon_sock.close()
-        del self._carbon_sock
+from src.config import AppConfig
+from src.app.context import TvTraderContext
+from src.schemas.alerts import TradingViewAlert, TradingViewAlertSchema
+import src.actions.carbon as actions_carbon
+import src.actions.websocket as actions_ws
+import src.app.helpers as helpers
 
 
 wsclients = set()
-
 carbon_connection = None
 try:
     carbon_connection = socket.create_connection(
@@ -78,11 +54,11 @@ async def alert_post(request, body: TradingViewAlert):
     """
     try:
         jsondata = attrs.asdict(body)
-        add_timezone_info(jsondata)
-        format_json_input(jsondata)
+        helpers.add_timezone_info(jsondata, Sanic.get_app())
+        helpers.format_json_input(jsondata)
     except Exception as ex:
         return json({"ERROR": str(ex)}, status=400)
-    await action_ws_send(jsondata)
+    await actions_ws.send_metric(jsondata, wsclients)
     return json("OK")
 
 
@@ -104,8 +80,8 @@ async def carbon_alert_post(request, body: TradingViewAlert):
     """
     try:
         jsondata = attrs.asdict(body)
-        add_timezone_info(jsondata)
-        format_json_input(jsondata)
+        helpers.add_timezone_info(jsondata, Sanic.get_app())
+        helpers.format_json_input(jsondata)
     except Exception as ex:
         return json({"ERROR": str(ex)}, status=400)
     # Message meaning conversion to numbers
@@ -117,7 +93,7 @@ async def carbon_alert_post(request, body: TradingViewAlert):
         value = int((config.CARBON_SELL_VALUE + config.CARBON_BUY_VALUE) / 2)
     # Message prepare
     msg = f'strat.{jsondata["stratName"]}.{jsondata["interval"]}.{jsondata["symbol"]} {value} {jsondata["timestamp"]}\n'
-    await send_metric(msg)
+    await actions_carbon.send_metric(msg)
     return json("OK")
 
 
@@ -134,47 +110,6 @@ async def feed(request, ws):
         if data is not None:
             logger.debug("ws data received: " + str(data))
             await ws.send(data)
-
-
-async def action_ws_send(jsondata: Dict):
-    for iws in wsclients.copy():
-        try:
-            await iws.send(js.dumps(jsondata))
-        except Exception as ex:
-            logger.error("Failed to send the alert via WS! " + str(ex))
-            wsclients.remove(iws)
-
-
-def add_timezone_info(jsondata: Dict):
-    """
-        Fixing the JSON data
-
-        Converts the timestamp string given in UTC string to
-        a local timezone based timestamp given in seconds.
-        Also converts the direction field to uppercase and appends
-        the utc_offset into the JSON object.
-    """
-    try:
-        local_time_zone = timezone(app.config.TIMEZONE)
-        t = time.strptime(jsondata["timestamp"], '%Y-%m-%dT%H:%M:%SZ')
-        dt = datetime(t.tm_year, t.tm_mon, t.tm_mday,
-                      t.tm_hour, t.tm_min, t.tm_sec)
-        utc_offset = local_time_zone.utcoffset(dt).total_seconds()
-        timestamp = dt.timestamp() + utc_offset
-    except Exception as ex:
-        logger.error(str(ex))
-        raise ex
-    jsondata["utcoffset"] = utc_offset
-    jsondata["timestamp"] = int(timestamp)
-
-
-def format_json_input(jsondata: Dict):
-    """
-        Data format processing
-
-        - strategy direction conversion to uppercase
-    """
-    jsondata["direction"] = jsondata["direction"].upper()
 
 
 @app.after_server_stop
