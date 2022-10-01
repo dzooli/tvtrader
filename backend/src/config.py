@@ -16,16 +16,17 @@ class AppConfig(Config):
     API_VERSION = '1.0.0'
     API_DESCRIPTION = "TradingView alert helper API"
     API_CONTACT_EMAIL = "zoltan.dzooli.fabian@gmail.com"
+    API_SECURITY = [{"BasicAuth": [], "ApiKeyAuth": []}]
+    API_SECURITY_DEFINITIONS = {"BasicAuth": {"type": "basic"}, "ApiKeyAuth": {
+        "type": "apiKey", "in": "header", "name": "X-API-KEY"}}
     OAS_IGNORE_OPTIONS = True
-    CORS = True
-    CORS_ORIGINS = "http://localhost:8080,https://www.tradingview.com"
-    CORS_METHODS = "GET,POST,OPTIONS"
-    CORS_AUTOMATIC_OPTIONS = True
     SWAGGER_UI_CONFIGURATION = {
         "apisSorter": "alpha",
         "jsonEditor": "false",
         "tryItOutEnabled": "false",
         "operationsSorter": "alpha",
+        "docExpansion": "list",
+        "displayRequestDuration": True
     }
     WS_URL = "ws://localhost:" + str(PORT) + "/alerts"
     CARBON_HOST = "localhost"
