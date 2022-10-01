@@ -1,6 +1,7 @@
 from sanic.log import logger
-from sanic_ext import openapi
 from sanic_ext import validate
+from sanic_ext import Config
+from sanic_openapi import openapi2_blueprint, doc
 from sanic.response import json
 from sanic import Sanic
 import time
@@ -27,26 +28,24 @@ appctx = TvTraderContext()
 appctx.carbon_sock = carbon_connection
 app = Sanic("TvTrader", config=AppConfig(),
             configure_logging=True, ctx=appctx)
+app.extend(config=Config(oas=False))
+app.blueprint(openapi2_blueprint)
 
 
 @app.get("/")
-@openapi.tag("backend")
-@openapi.summary("Healthcheck endpoint")
+@doc.tag("Backend")
+@doc.summary("Healthcheck endpoint")
+@doc.response(200, {"status": int, "message": str})
 def check(request):
-    return json("HEALTHY " + app.config.APPNAME)
+    return json({"status": 200, "message": "HEALTHY " + app.config.APPNAME})
 
 
 @app.post("/alert")
-@openapi.tag("frontend")
-@openapi.operation("frontendAlert")
-@openapi.body({
-    "application/json": TradingViewAlertSchema},
-    description="Alert from TradingView forwarded to the frontend",
-    required=True,
-    name="data",
-)
-@openapi.response(200, "OK", description='Success')
-@openapi.response(400, description="Error occurred. See ERROR property in the response")
+@doc.tag("Frontend")
+@doc.operation("frontendAlert")
+@doc.consumes(TradingViewAlertSchema, location="body")
+@doc.response(200, "OK", description="Success")
+@doc.response(500, {"description": str, "status": int, "message": str}, description="Error occurred. See 'message' property in the response")
 @validate(json=TradingViewAlert)
 async def alert_post(request, body: TradingViewAlert):
     """
@@ -63,16 +62,11 @@ async def alert_post(request, body: TradingViewAlert):
 
 
 @app.post("/carbon-alert")
-@openapi.tag("backend")
-@openapi.operation("carbonAlert")
-@openapi.body({
-    "application/json": TradingViewAlertSchema},
-    description="Alert from TradingView forwarded to Carbon",
-    required=True,
-    name="data"
-)
-@openapi.response(200, "OK", description='Success')
-@openapi.response(400, description="Error occurred. See ERROR property in the response")
+@doc.tag("Backend")
+@doc.operation("carbonAlert")
+@doc.consumes(TradingViewAlertSchema, location="body")
+@doc.response(200, "OK", description='Success')
+@doc.response(500, {"description": str, "status": int, "message": str}, description="Error occurred. See 'message' property in the response")
 @validate(json=TradingViewAlert)
 async def carbon_alert_post(request, body: TradingViewAlert):
     """
@@ -97,6 +91,8 @@ async def carbon_alert_post(request, body: TradingViewAlert):
     return json("OK")
 
 
+@doc.exclude(True)
+@doc.route(summary="Websocket endpoint")
 @app.websocket("/wsalerts")
 async def feed(request, ws):
     """

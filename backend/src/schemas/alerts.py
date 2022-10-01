@@ -1,5 +1,5 @@
 from attrs import define, validators, field
-from sanic_ext import openapi
+from sanic_openapi import doc
 
 
 @define
@@ -42,15 +42,15 @@ class TradingViewAlert:
 
 
 class TradingViewAlertSchema:
-    stratId = openapi.Integer(
-        description="Strategy identifier", required=True, example=1)
-    stratName = openapi.String(
-        description="Strategy name", required=True, example="EMARSI")
-    symbol = openapi.String(
-        description="Symbol for the alert", required=True, example="GBPUSD")
-    interval = openapi.Integer(
-        description="Strategy operational timeframe", required=True, example=15)
-    direction = openapi.String(description="Strategy direction",
-                               oneOf=["BUY", "SELL"], required=True)
-    timestamp = openapi.DateTime(
-        description="Timestamp of the alert in UTC time", required=True, example="2022-09-30T16:22:02Z")
+    stratId = doc.Integer(
+        description="Strategy identifier", required=True)
+    stratName = doc.String(
+        description="Strategy name", required=True)
+    symbol = doc.String(
+        description="Symbol for the alert", required=True)
+    interval = doc.Integer(
+        description="Strategy operational timeframe, minimum value 1", required=True)
+    direction = doc.String(
+        choices=["BUY", "buy", "SELL", "sell"], description="Strategy direction", required=True)
+    timestamp = doc.DateTime(
+        description="Timestamp of the alert in UTC time without milliseconds", required=True)
