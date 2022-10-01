@@ -1,5 +1,7 @@
 # TvTrader fullstack
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=dzooli_tvtrader&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=dzooli_tvtrader)
+
 ## Description
 
 This is a helper application for Tradingview alerts.
