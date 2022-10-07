@@ -39,7 +39,7 @@ if argno > 1:
     data['stratName'] = argv[1]
 if argno > 2:
     data['symbol'] = argv[2]
-    if argv[3] is not None:
+    if argno == 4 and argv[3] is not None:
         try:
             time_before = int(argv[3])
         except ValueError:
