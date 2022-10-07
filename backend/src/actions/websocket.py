@@ -1,3 +1,9 @@
+"""
+    Websocket related actions
+
+    File:       websocket.py
+    Author:     Zoltan Fabian <zoltan.dzooli.fabian@gmail.com>
+"""
 import json as js
 from typing import Dict, List
 from sanic.log import logger

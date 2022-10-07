@@ -1,8 +1,8 @@
 """
-Carbon communication related functions.
+    Carbon communication related functions.
 
-File:       carbon.py
-Author:     Zoltan Fabian
+    File:       carbon.py
+    Author:     Zoltan Fabian <zoltan.dzooli.fabian@gmail.com>
 """
 import socket
 from sanic import Sanic
