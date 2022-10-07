@@ -22,3 +22,4 @@ utility
 uvicorn
 websockets
 requests
+sanic-openapi
