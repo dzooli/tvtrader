@@ -11,6 +11,7 @@ import attrs
 from src.config import AppConfig
 from src.app.context import TvTraderContext
 from src.schemas.alerts import TradingViewAlert, TradingViewAlertSchema
+from src.schemas.response_error import ErrorResponseSchema
 import src.actions.carbon as actions_carbon
 import src.actions.websocket as actions_ws
 import src.app.helpers as helpers
@@ -45,7 +46,7 @@ def check(request):
 @doc.operation("frontendAlert")
 @doc.consumes(TradingViewAlertSchema, location="body")
 @doc.response(200, "OK", description="Success")
-@doc.response(500, {"description": str, "status": int, "message": str}, description="Error occurred. See 'message' property in the response")
+@doc.response(500, ErrorResponseSchema, description="Error occurred. See 'message' property in the response")
 @validate(json=TradingViewAlert)
 async def alert_post(request, body: TradingViewAlert):
     """
@@ -66,7 +67,7 @@ async def alert_post(request, body: TradingViewAlert):
 @doc.operation("carbonAlert")
 @doc.consumes(TradingViewAlertSchema, location="body")
 @doc.response(200, "OK", description='Success')
-@doc.response(500, {"description": str, "status": int, "message": str}, description="Error occurred. See 'message' property in the response")
+@doc.response(500, ErrorResponseSchema, description="Error occurred. See 'message' property in the response")
 @validate(json=TradingViewAlert)
 async def carbon_alert_post(request, body: TradingViewAlert):
     """
