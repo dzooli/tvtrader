@@ -11,8 +11,7 @@ import attrs
 from src.config import AppConfig
 from src.app.context import TvTraderContext
 from src.schemas.alerts import TradingViewAlert, TradingViewAlertSchema
-from src.schemas.response_error import ErrorResponseSchema
-from src.schemas.response_success import SuccessResponseSchema
+from src.schemas.responses import SuccessResponseSchema, ErrorResponseSchema
 import src.actions.carbon as actions_carbon
 import src.actions.websocket as actions_ws
 import src.app.helpers as helpers
