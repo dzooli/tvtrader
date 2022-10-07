@@ -59,7 +59,7 @@ async def alert_post(request, body: TradingViewAlert):
     except Exception as ex:
         return json({"ERROR": str(ex)}, status=400)
     await actions_ws.send_metric(jsondata, wsclients)
-    return json("OK")
+    return json({"status": 200, "message": "OK"})
 
 
 @app.post("/carbon-alert")
@@ -89,7 +89,7 @@ async def carbon_alert_post(request, body: TradingViewAlert):
     # Message prepare
     msg = f'strat.{jsondata["stratName"]}.{jsondata["interval"]}.{jsondata["symbol"]} {value} {jsondata["timestamp"]}\n'
     await actions_carbon.send_metric(msg)
-    return json("OK")
+    return json({"status": 200, "message": "OK"})
 
 
 @doc.exclude(True)
@@ -97,7 +97,10 @@ async def carbon_alert_post(request, body: TradingViewAlert):
 @app.websocket("/wsalerts")
 async def feed(request, ws):
     """
-        Websocket endpoint for the connected clients.
+        Websocket endpoint
+
+        Websocket endpoint for the connected clients. Clients receive 
+        all the alerts received by the server via '/alert' POST endpoint.
     """
     logger.debug("ws request: " + str(request))
     wsclients.add(ws)
