@@ -11,6 +11,7 @@ import attrs
 from src.config import AppConfig
 from src.app.context import TvTraderContext
 from src.schemas.alerts import TradingViewAlert, TradingViewAlertSchema
+from src.schemas.responses import SuccessResponseSchema, ErrorResponseSchema
 import src.actions.carbon as actions_carbon
 import src.actions.websocket as actions_ws
 import src.app.helpers as helpers
@@ -35,7 +36,7 @@ app.blueprint(openapi2_blueprint)
 @app.get("/")
 @doc.tag("Backend")
 @doc.summary("Healthcheck endpoint")
-@doc.response(200, {"status": int, "message": str})
+@doc.response(200, SuccessResponseSchema, description="Success")
 def check(request):
     return json({"status": 200, "message": "HEALTHY " + app.config.APPNAME})
 
@@ -44,8 +45,8 @@ def check(request):
 @doc.tag("Frontend")
 @doc.operation("frontendAlert")
 @doc.consumes(TradingViewAlertSchema, location="body")
-@doc.response(200, "OK", description="Success")
-@doc.response(500, {"description": str, "status": int, "message": str}, description="Error occurred. See 'message' property in the response")
+@doc.response(200, SuccessResponseSchema, description="Success")
+@doc.response(500, ErrorResponseSchema, description="Error occurred. See 'message' property in the response")
 @validate(json=TradingViewAlert)
 async def alert_post(request, body: TradingViewAlert):
     """
@@ -58,15 +59,15 @@ async def alert_post(request, body: TradingViewAlert):
     except Exception as ex:
         return json({"ERROR": str(ex)}, status=400)
     await actions_ws.send_metric(jsondata, wsclients)
-    return json("OK")
+    return json({"status": 200, "message": "OK"})
 
 
 @app.post("/carbon-alert")
 @doc.tag("Backend")
 @doc.operation("carbonAlert")
 @doc.consumes(TradingViewAlertSchema, location="body")
-@doc.response(200, "OK", description='Success')
-@doc.response(500, {"description": str, "status": int, "message": str}, description="Error occurred. See 'message' property in the response")
+@doc.response(200, SuccessResponseSchema, description='Success')
+@doc.response(500, ErrorResponseSchema, description="Error occurred. See 'message' property in the response")
 @validate(json=TradingViewAlert)
 async def carbon_alert_post(request, body: TradingViewAlert):
     """
@@ -88,7 +89,7 @@ async def carbon_alert_post(request, body: TradingViewAlert):
     # Message prepare
     msg = f'strat.{jsondata["stratName"]}.{jsondata["interval"]}.{jsondata["symbol"]} {value} {jsondata["timestamp"]}\n'
     await actions_carbon.send_metric(msg)
-    return json("OK")
+    return json({"status": 200, "message": "OK"})
 
 
 @doc.exclude(True)
@@ -96,7 +97,10 @@ async def carbon_alert_post(request, body: TradingViewAlert):
 @app.websocket("/wsalerts")
 async def feed(request, ws):
     """
-        Websocket endpoint for the connected clients.
+        Websocket endpoint
+
+        Websocket endpoint for the connected clients. Clients receive 
+        all the alerts received by the server via '/alert' POST endpoint.
     """
     logger.debug("ws request: " + str(request))
     wsclients.add(ws)
