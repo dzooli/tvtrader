@@ -47,10 +47,22 @@ Using a __Linux__ environment:
 ```bash
 python -m venv .
 source bin/activate
-pip install -f requirements.txt
+pip install -r requirements.txt
 ```
 
-Under Windows the virtualenv creates a different directory structure and avtivation will also be different. Please read the virtualenv related documentation first.
+#### Start backend
+
+```bash
+cd backend
+./start.sh
+```
+
+```bash
+# or after manual venv activation
+python -m src.server
+```
+
+Under Windows the virtualenv creates a different directory structure and activation will also be different. Please read the virtualenv related documentation first.
 
 ### Frontend
 
@@ -58,6 +70,12 @@ Under Windows the virtualenv creates a different directory structure and avtivat
 cd frontend
 npm -g i yarn
 yarn install
+```
+
+#### Start frontend
+
+```bash
+cd frontend
 yarn serve # For development. Use 'yarn build' for production use and deploy it in your preferred way.
 ```
 
