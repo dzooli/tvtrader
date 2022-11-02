@@ -31,8 +31,5 @@ node_modules
 *.pyc
 *.code-workspace
 
-/backend/Scripts
-/backend/Lib
-/backend/Include
-/backend/pyvenv.cfg
+/backend/venv
 

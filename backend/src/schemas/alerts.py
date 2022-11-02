@@ -1,5 +1,6 @@
 from attrs import define, validators, field
 from sanic_openapi import doc
+import re
 
 
 @define
@@ -30,7 +31,8 @@ class TradingViewAlert:
     direction: str = field(
         validator=[
             validators.instance_of(str),
-            validators.in_(["BUY", "SELL", "buy", "sell"])
+            #validators.in_(["BUY", "SELL", "buy", "sell", "Close entry(s) order short", "Close entry(s) order long"])
+            validators.matches_re("(buy|sell|close.*)", flags=re.IGNORECASE)
         ]
     )
     timestamp: str = field(
@@ -51,6 +53,6 @@ class TradingViewAlertSchema:
     interval = doc.Integer(
         description="Strategy operational timeframe, minimum value 1", required=True)
     direction = doc.String(
-        choices=["BUY", "buy", "SELL", "sell"], description="Strategy direction", required=True)
+        choices=["BUY", "buy", "SELL", "sell", "Close entry(s) order long", "Close entry(s) order short"], description="Strategy direction", required=True)
     timestamp = doc.DateTime(
         description="Timestamp of the alert in UTC time without milliseconds", required=True)
