@@ -1,3 +1,5 @@
+
+# Valid Open Sell alert
 POST http://localhost:8089/alert
 Content-Type: application/json
 
@@ -10,6 +12,64 @@ Content-Type: application/json
     "timestamp": "2019-08-27T09:56:00Z"
 }
 ###
+
+# Valid Open Buy alert
+POST http://localhost:8089/alert
+Content-Type: application/json
+
+{
+    "stratId": 0,
+    "stratName": "HELLO",
+    "symbol": "FXCM:GBPUSD",
+    "interval": 15,
+    "direction": "buy",
+    "timestamp": "2019-08-27T09:56:00Z"
+}
+###
+
+# Valid Close long alert
+POST http://localhost:8089/alert
+Content-Type: application/json
+
+{
+    "stratId": 0,
+    "stratName": "HELLO",
+    "symbol": "FXCM:GBPUSD",
+    "interval": 15,
+    "direction": "Close entry(s) order long",
+    "timestamp": "2019-08-27T09:56:00Z"
+}
+###
+
+# Valid Close short alert
+POST http://localhost:8089/alert
+Content-Type: application/json
+
+{
+    "stratId": 0,
+    "stratName": "HELLO",
+    "symbol": "FXCM:GBPUSD",
+    "interval": 15,
+    "direction": "Close entry(s) order short",
+    "timestamp": "2019-08-27T09:56:00Z"
+}
+###
+
+# Invalid close alert "Cloxe" instead of "Close"
+POST http://localhost:8089/alert
+Content-Type: application/json
+
+{
+    "stratId": 0,
+    "stratName": "HELLO",
+    "symbol": "FXCM:GBPUSD",
+    "interval": 15,
+    "direction": "Cloxe entry(s) order short",
+    "timestamp": "2019-08-27T09:56:00Z"
+}
+###
+
+# Invalid Sell alert - missing "interval"
 POST http://localhost:8089/alert
 Content-Type: application/json
 
@@ -21,8 +81,15 @@ Content-Type: application/json
     "timestamp": "2019-08-27T09:56:00Z"
 }
 ###
+
+# Invalid alert - missing content
 POST http://localhost:8089/alert
 Content-Type: application/json
 
 {}
+###
+
+# Valid heartbeat request
+GET http://localhost:8089/
+###
 
