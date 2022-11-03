@@ -1,4 +1,4 @@
 #!/bin/bash
 
-source Scripts/activate
+source venv/Scripts/activate
 python -m src.server
