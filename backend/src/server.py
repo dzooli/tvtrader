@@ -46,7 +46,8 @@ def check(request):
 @doc.operation("frontendAlert")
 @doc.consumes(TradingViewAlertSchema, location="body")
 @doc.response(200, SuccessResponseSchema, description="Success")
-@doc.response(500, ErrorResponseSchema, description="Error occurred. See 'message' property in the response")
+@doc.response(500, ErrorResponseSchema,
+              description="Error. See 'message' property in the response")
 @validate(json=TradingViewAlert)
 async def alert_post(request, body: TradingViewAlert):
     """
@@ -67,7 +68,8 @@ async def alert_post(request, body: TradingViewAlert):
 @doc.operation("carbonAlert")
 @doc.consumes(TradingViewAlertSchema, location="body")
 @doc.response(200, SuccessResponseSchema, description='Success')
-@doc.response(500, ErrorResponseSchema, description="Error occurred. See 'message' property in the response")
+@doc.response(500, ErrorResponseSchema,
+              description="Error. See 'message' property in the response")
 @validate(json=TradingViewAlert)
 async def carbon_alert_post(request, body: TradingViewAlert):
     """
@@ -81,7 +83,8 @@ async def carbon_alert_post(request, body: TradingViewAlert):
         return json({"ERROR": str(ex)}, status=400)
     # Message meaning conversion to numbers
     config = Sanic.get_app().config
-    value = config.CARBON_SELL_VALUE if jsondata["direction"] == "SELL" else config.CARBON_BUY_VALUE
+    value = config.CARBON_SELL_VALUE if jsondata["direction"] == "SELL" \
+        else config.CARBON_BUY_VALUE
     timediff = int(time.time()) - \
         (jsondata["timestamp"] + jsondata["utcoffset"])
     if timediff > (config.GR_TIMEOUT * 60):
@@ -99,7 +102,7 @@ async def feed(request, ws):
     """
         Websocket endpoint
 
-        Websocket endpoint for the connected clients. Clients receive 
+        Websocket endpoint for the connected clients. Clients receive
         all the alerts received by the server via '/alert' POST endpoint.
     """
     logger.debug("ws request: " + str(request))
