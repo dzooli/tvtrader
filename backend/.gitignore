@@ -1,2 +1,7 @@
 *.code-workspace
+.vscode
 venv/**
+!reports/allure/.gitkeep
+reports/*/*.json
+reports/*/*.xml
+
