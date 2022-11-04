@@ -17,9 +17,12 @@ class AppConfig(Config):
     API_DESCRIPTION = "TradingView alert helper API"
     API_CONTACT_EMAIL = "zoltan.dzooli.fabian@gmail.com"
     API_SECURITY = [{"BasicAuth": [], "ApiKeyAuth": []}]
-    API_SECURITY_DEFINITIONS = {"BasicAuth": {"type": "basic"}, "ApiKeyAuth": {
-        "type": "apiKey", "in": "header", "name": "X-API-KEY"}}
+    API_SECURITY_DEFINITIONS = {
+        "BasicAuth": {"type": "basic"},
+        "ApiKeyAuth": {"type": "apiKey", "in": "header", "name": "X-API-KEY"}
+    }
     OAS_IGNORE_OPTIONS = True
+    CORS_ORIGINS = "http://localhost:8089"
     SWAGGER_UI_CONFIGURATION = {
         "apisSorter": "alpha",
         "jsonEditor": "false",
