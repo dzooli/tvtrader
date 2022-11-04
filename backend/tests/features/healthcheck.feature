@@ -7,3 +7,4 @@
     Scenario: Server heart is working
         When GET "/" route
         Then message contains "HEALTHY"
+        And response code is 200
