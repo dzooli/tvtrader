@@ -46,7 +46,7 @@ def check(request):
 @doc.operation("frontendAlert")
 @doc.consumes(TradingViewAlertSchema, location="body")
 @doc.response(200, SuccessResponseSchema, description="Success")
-@doc.response(500, ErrorResponseSchema,
+@doc.response(400, ErrorResponseSchema,
               description="Error. See 'message' property in the response")
 @validate(json=TradingViewAlert)
 async def alert_post(request, body: TradingViewAlert):
@@ -58,7 +58,7 @@ async def alert_post(request, body: TradingViewAlert):
         helpers.add_timezone_info(jsondata, Sanic.get_app())
         helpers.format_json_input(jsondata)
     except Exception as ex:
-        return json({"ERROR": str(ex)}, status=400)
+        return json({"description": str(ex), "message": "ERROR", "status": 400}, status=400)
     await actions_ws.send_metric(jsondata, wsclients)
     return json({"status": 200, "message": "OK"})
 
@@ -68,7 +68,7 @@ async def alert_post(request, body: TradingViewAlert):
 @doc.operation("carbonAlert")
 @doc.consumes(TradingViewAlertSchema, location="body")
 @doc.response(200, SuccessResponseSchema, description='Success')
-@doc.response(500, ErrorResponseSchema,
+@doc.response(400, ErrorResponseSchema,
               description="Error. See 'message' property in the response")
 @validate(json=TradingViewAlert)
 async def carbon_alert_post(request, body: TradingViewAlert):
@@ -80,7 +80,7 @@ async def carbon_alert_post(request, body: TradingViewAlert):
         helpers.add_timezone_info(jsondata, Sanic.get_app())
         helpers.format_json_input(jsondata)
     except Exception as ex:
-        return json({"ERROR": str(ex)}, status=400)
+        return json({"description": str(ex), "message": "ERROR", "status": 400}, status=400)
     # Message meaning conversion to numbers
     config = Sanic.get_app().config
     value = config.CARBON_SELL_VALUE if jsondata["direction"] == "SELL" \
