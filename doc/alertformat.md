@@ -11,9 +11,10 @@
 
 ```json
 {
-    "stratId":1,
-    "stratName":"LRATR",
+    "id":1,
+    "name":"WINNER",
     "symbol": "{{exchange}}:{{ticker}}",
+    "price": "{{close}}",
     "interval":{{interval}},
     "direction":"{{strategy.order.comment}}",
     "timestamp": "{{timenow}}"
