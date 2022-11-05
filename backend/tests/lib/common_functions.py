@@ -12,9 +12,5 @@ def asdict(obj: object) -> dict:
     """
     if obj is None:
         raise AttributeError(f"{str(obj)} is not a valid object")
-    try:
-        attrs = getattr(obj, "__slots__")
-    except AttributeError as ex:
-        raise ex
     return {attrname: getattr(obj, attrname)
             for attrname in obj.__slots__ if attrname != "__weakref__"}
