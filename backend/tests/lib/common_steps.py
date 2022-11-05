@@ -18,7 +18,7 @@ def step_server_available(base_url: str) -> None:
 
 
 @when(parsers.parse('GET "{route}" route'), target_fixture="response")
-def step_get_route(base_url, route):
+def step_get_route(base_url, route) -> requests.Response:
     resp = None
     try:
         resp = requests.get(f"{base_url}{route}")
@@ -29,19 +29,19 @@ def step_get_route(base_url, route):
 
 
 @then(parsers.parse('response code is {code:d}'))
-def step_resp_code_is(code, response: requests.Response):
+def step_resp_code_is(code, response: requests.Response) -> None:
     assert isinstance(response, requests.Response)
     assert response.status_code == code, f"Got unexpected response code {response.status_code} (expected: {code})"
 
 
 @then(parsers.parse('message contains "{required_text}"'))
-def step_message_contains(required_text, response):
+def step_message_contains(required_text, response) -> None:
     assert "message" in response.json().keys(), "Response message not found!"
     assert required_text in response.json()["message"], \
         "Message content not found!"
 
 
 @then('response dumped')
-def step_dump_response(response, capsys):
+def step_dump_response(response, capsys) -> None:
     with capsys.disabled():
         print(f"Response dump: {response.json()}")
