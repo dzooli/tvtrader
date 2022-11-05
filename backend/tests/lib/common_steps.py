@@ -19,6 +19,7 @@ def step_server_available(base_url: str) -> None:
 
 @when(parsers.parse('GET "{route}" route'), target_fixture="response")
 def step_get_route(base_url, route):
+    resp = None
     try:
         resp = requests.get(f"{base_url}{route}")
     except Exception:
