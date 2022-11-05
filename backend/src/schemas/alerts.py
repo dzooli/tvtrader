@@ -4,9 +4,9 @@ import re
 
 
 @define
-class TradingViewAlert:
+class TradingViewAlert(object):
     id: int = field(validator=[validators.ge(0)])
-    name: str = field()
+    name: str = field(validator=[validators.min_len(1)])
     symbol: str = field(validator=[validators.min_len(1)])
     interval: int = field(validator=[validators.ge(1)])
     direction: str = field(validator=[validators.matches_re(
