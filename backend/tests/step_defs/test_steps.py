@@ -5,7 +5,7 @@ from pytest_bdd import when, then, given, scenarios, parsers
 from ..lib.fixtures import base_url
 from ..lib.common_steps import *
 from ..lib.common_functions import asdict
-from ..lib.schemas.alerts import TradingViewAlert
+from src.schemas.alerts import TradingViewAlert
 
 scenarios('../features')
 
