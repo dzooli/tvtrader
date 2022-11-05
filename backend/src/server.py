@@ -1,3 +1,4 @@
+from sanic.worker.manager import WorkerManager
 from sanic.log import logger
 from sanic_ext import validate
 from sanic_ext import Config
@@ -130,10 +131,13 @@ def teardown():
         logger.error("Carbon connection close failed!")
 
 
+WorkerManager.THRESHOLD = 300
+
 if __name__ == '__main__':
     app.run(host="127.0.0.1",
             port=app.config.PORT,
             dev=app.config.DEV,
             fast=not app.config.DEV,
             access_log=app.config.DEV,
+            workers=4
             )
