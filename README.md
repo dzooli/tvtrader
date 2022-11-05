@@ -6,7 +6,9 @@
 
 This is a full stack Sanic+Vue application for easily collect and process TradingView alerts.
 
-__Do not use in production__ as it is created for learning and personal use only. __No authentication__ is implemented yet.
+Also a good candidate to learn more about test automation. **Pytest-BDD** is used for test automation, see the `tests` folder for examples.
+
+**Do not use in production** as it is created for learning and personal use only. **No authentication** is implemented yet.
 
 ## Overview
 
@@ -42,7 +44,7 @@ cd tvtrader
 
 ### Backend
 
-Using a __Linux__ environment:
+Using a **Linux** environment:
 
 ```bash
 python -m venv .
@@ -83,7 +85,7 @@ yarn serve # For development. Use 'yarn build' for production use and deploy it 
 
 ### Alert catching setup
 
-Install TamperMonkey Chrome extension and add the scripts from the ```scripts``` directory. Restrict them to run only on ```https://tradingview.com/charts/*``` on the settings page and __do other security related settings as you wish.__ Do not forget, TamperMonkey is a powerful but double-edged tool.
+Install TamperMonkey Chrome extension and add the scripts from the `scripts` directory. Restrict them to run only on `https://tradingview.com/charts/*` on the settings page and **do other security related settings as you wish.** Do not forget, TamperMonkey is a powerful but double-edged tool.
 
 Open TradingView, login and display the alerts panel. Add a properly formatted alert following the directions below.
 
@@ -115,8 +117,8 @@ Open TradingView, login and display the alerts panel. Add a properly formatted a
 
 ### Enjoy
 
- Start the backend first and the frontend. Open the frontend with your browser on [http://localhost:8080/] and wait for the alerts.
+Start the backend first and the frontend. Open the frontend with your browser on [http://localhost:8080/] and wait for the alerts.
 
 ## Extras
 
-In the ```doc``` folder you can find a Grafana dashboard example JSON file directly exported from my working setup.
+In the `doc` folder you can find a Grafana dashboard example JSON file directly exported from my working setup.
