@@ -139,5 +139,5 @@ if __name__ == '__main__':
             dev=app.config.DEV,
             fast=not app.config.DEV,
             access_log=app.config.DEV,
-            workers=4
+            workers=app.config.WORKERS
             )
