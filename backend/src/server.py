@@ -90,7 +90,7 @@ async def carbon_alert_post(request, body: TradingViewAlert):
     if timediff > (config.GR_TIMEOUT * 60):
         value = int((config.CARBON_SELL_VALUE + config.CARBON_BUY_VALUE) / 2)
     # Message prepare
-    msg = f'strat.{jsondata["stratName"]}.{jsondata["interval"]}.{jsondata["symbol"]} {value} {jsondata["timestamp"]}\n'
+    msg = f'strat.{jsondata["name"]}.{jsondata["interval"]}.{jsondata["symbol"]} {value} {jsondata["timestamp"]}\n'
     await actions_carbon.send_metric(msg)
     return json({"status": 200, "message": "OK"})
 
