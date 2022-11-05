@@ -3,13 +3,28 @@ import requests
 
 
 @given(parsers.parse('server available'))
-def step_server_available(base_url):
+def step_server_available(base_url: str) -> None:
+    """Check if server is responsible
+
+    Args:
+        base_url (str): Server health endpoint
+    """
     resp = None
     try:
         resp = requests.get(base_url)
     except Exception as ex:
         assert False, f"Connection failed: {str(ex)}!"
     assert resp is not None, "No response from the server"
+
+
+@when(parsers.parse('GET "{route}" route'), target_fixture="response")
+def step_get_route(base_url, route):
+    try:
+        resp = requests.get(f"{base_url}{route}")
+    except Exception:
+        assert False, "Connection failed!"
+    assert resp is not None, "Request failed!"
+    return resp
 
 
 @then(parsers.parse('response code is {code:d}'))
