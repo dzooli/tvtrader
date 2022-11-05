@@ -12,7 +12,7 @@ class AppConfig(Config):
     # Internal configuration
     APPNAME = "TradingView Trader"
     PORT = 8089
-    WORKERS = 4
+    KEEP_ALIVE_TIMEOUT = 60
     API_TITLE = "TvTrader API"
     API_VERSION = '1.0.0'
     API_DESCRIPTION = "TradingView alert helper API"
