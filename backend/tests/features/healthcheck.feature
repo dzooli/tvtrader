@@ -1,5 +1,5 @@
     Feature Backend health
-    Simple tests for the Backend
+    Simple health check for the backend
 
     Background: Server available
         Given server available
