@@ -22,14 +22,14 @@ wsclients = set()
 carbon_connection = None
 try:
     carbon_connection = socket.create_connection(
-        (AppConfig.CARBON_HOST, AppConfig.CARBON_PORT))
+        (AppConfig.CARBON_HOST, AppConfig.CARBON_PORT)
+    )
 except ConnectionRefusedError:
     logger.error("[ERROR] Carbon connection is not available.")
 
 appctx = TvTraderContext()
 appctx.carbon_sock = carbon_connection
-app = Sanic("TvTrader", config=AppConfig(),
-            configure_logging=True, ctx=appctx)
+app = Sanic("TvTrader", config=AppConfig(), configure_logging=True, ctx=appctx)
 app.extend(config=Config(oas=False))
 app.blueprint(openapi2_blueprint)
 
@@ -47,8 +47,11 @@ def check(request):
 @doc.operation("frontendAlert")
 @doc.consumes(TradingViewAlertSchema, location="body")
 @doc.response(200, SuccessResponseSchema, description="Success")
-@doc.response(400, ErrorResponseSchema,
-              description="Error. See 'message' property in the response")
+@doc.response(
+    400,
+    ErrorResponseSchema,
+    description="Error. See 'message' property in the response",
+)
 @validate(json=TradingViewAlert)
 async def alert_post(request, body: TradingViewAlert):
     """
@@ -59,7 +62,9 @@ async def alert_post(request, body: TradingViewAlert):
         helpers.add_timezone_info(jsondata, Sanic.get_app())
         helpers.format_json_input(jsondata)
     except Exception as ex:
-        return json({"description": str(ex), "message": "ERROR", "status": 400}, status=400)
+        return json(
+            {"description": str(ex), "message": "ERROR", "status": 400}, status=400
+        )
     await actions_ws.send_metric(jsondata, wsclients)
     return json({"status": 200, "message": "OK"})
 
@@ -68,26 +73,33 @@ async def alert_post(request, body: TradingViewAlert):
 @doc.tag("Backend")
 @doc.operation("carbonAlert")
 @doc.consumes(TradingViewAlertSchema, location="body")
-@doc.response(200, SuccessResponseSchema, description='Success')
-@doc.response(400, ErrorResponseSchema,
-              description="Error. See 'message' property in the response")
+@doc.response(200, SuccessResponseSchema, description="Success")
+@doc.response(
+    400,
+    ErrorResponseSchema,
+    description="Error. See 'message' property in the response",
+)
 @validate(json=TradingViewAlert)
 async def carbon_alert_post(request, body: TradingViewAlert):
     """
-        Alert POST endpoint to forward the alerts to a Carbon server.
+    Alert POST endpoint to forward the alerts to a Carbon server.
     """
     try:
         jsondata = attrs.asdict(body)
         helpers.add_timezone_info(jsondata, Sanic.get_app())
         helpers.format_json_input(jsondata)
     except Exception as ex:
-        return json({"description": str(ex), "message": "ERROR", "status": 400}, status=400)
+        return json(
+            {"description": str(ex), "message": "ERROR", "status": 400}, status=400
+        )
     # Message meaning conversion to numbers
     config = Sanic.get_app().config
-    value = config.CARBON_SELL_VALUE if jsondata["direction"] == "SELL" \
+    value = (
+        config.CARBON_SELL_VALUE
+        if jsondata["direction"] == "SELL"
         else config.CARBON_BUY_VALUE
-    timediff = int(time.time()) - \
-        (jsondata["timestamp"] + jsondata["utcoffset"])
+    )
+    timediff = int(time.time()) - (jsondata["timestamp"] + jsondata["utcoffset"])
     if timediff > (config.GR_TIMEOUT * 60):
         value = int((config.CARBON_SELL_VALUE + config.CARBON_BUY_VALUE) / 2)
     # Message prepare
@@ -101,10 +113,10 @@ async def carbon_alert_post(request, body: TradingViewAlert):
 @app.websocket("/wsalerts")
 async def feed(request, ws):
     """
-        Websocket endpoint
+    Websocket endpoint
 
-        Websocket endpoint for the connected clients. Clients receive
-        all the alerts received by the server via '/alert' POST endpoint.
+    Websocket endpoint for the connected clients. Clients receive
+    all the alerts received by the server via '/alert' POST endpoint.
     """
     logger.debug("ws request: " + str(request))
     wsclients.add(ws)
@@ -119,9 +131,9 @@ async def feed(request, ws):
 @app.after_server_stop
 def teardown():
     """
-        Application shutdown
+    Application shutdown
 
-        Cleanup after server shutdown.
+    Cleanup after server shutdown.
     """
     logger.debug("Closing the Carbon socket...")
     sock = Sanic.get_app().ctx.carbon_sock
@@ -133,10 +145,11 @@ def teardown():
 
 WorkerManager.THRESHOLD = 300
 
-if __name__ == '__main__':
-    app.run(host="127.0.0.1",
-            port=app.config.PORT,
-            dev=app.config.DEV,
-            fast=not app.config.DEV,
-            access_log=app.config.DEV,
-            )
+if __name__ == "__main__":
+    app.run(
+        host="127.0.0.1",
+        port=app.config.PORT,
+        dev=app.config.DEV,
+        fast=not app.config.DEV,
+        access_log=app.config.DEV,
+    )

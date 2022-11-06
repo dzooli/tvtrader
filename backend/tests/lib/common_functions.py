@@ -1,5 +1,6 @@
 def asdict(obj: object) -> dict:
-    """Convert the object to a dict.
+    """
+    Convert the object to a dict.
 
     Args:
         obj (object): Input object
@@ -12,5 +13,8 @@ def asdict(obj: object) -> dict:
     """
     if obj is None:
         raise AttributeError(f"{str(obj)} is not a valid object")
-    return {attrname: getattr(obj, attrname)
-            for attrname in obj.__slots__ if attrname != "__weakref__"}
+    return {
+        attrname: getattr(obj, attrname)
+        for attrname in obj.__slots__
+        if attrname != "__weakref__"
+    }

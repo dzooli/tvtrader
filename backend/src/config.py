@@ -14,13 +14,13 @@ class AppConfig(Config):
     PORT = 8089
     KEEP_ALIVE_TIMEOUT = 60
     API_TITLE = "TvTrader API"
-    API_VERSION = '1.0.0'
+    API_VERSION = "1.0.0"
     API_DESCRIPTION = "TradingView alert helper API"
     API_CONTACT_EMAIL = "zoltan.dzooli.fabian@gmail.com"
     API_SECURITY = [{"BasicAuth": [], "ApiKeyAuth": []}]
     API_SECURITY_DEFINITIONS = {
         "BasicAuth": {"type": "basic"},
-        "ApiKeyAuth": {"type": "apiKey", "in": "header", "name": "X-API-KEY"}
+        "ApiKeyAuth": {"type": "apiKey", "in": "header", "name": "X-API-KEY"},
     }
     OAS_IGNORE_OPTIONS = True
     CORS_ORIGINS = "http://localhost:8089"
@@ -30,7 +30,7 @@ class AppConfig(Config):
         "tryItOutEnabled": "false",
         "operationsSorter": "alpha",
         "docExpansion": "list",
-        "displayRequestDuration": True
+        "displayRequestDuration": True,
     }
     WS_URL = "ws://localhost:" + str(PORT) + "/alerts"
     CARBON_HOST = "localhost"
