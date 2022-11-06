@@ -1,6 +1,7 @@
+from __future__ import annotations
+import re
 from attrs import define, validators, field
 from sanic_openapi import doc
-import re
 
 
 @define

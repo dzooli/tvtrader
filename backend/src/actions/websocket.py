@@ -14,5 +14,5 @@ async def send_metric(jsondata: Dict, clients: List):
         try:
             await iws.send(js.dumps(jsondata))
         except Exception as ex:
-            logger.error("Failed to send the alert via WS! " + str(ex))
+            logger.error("Failed to send the alert via WS! %s", str(ex))
             clients.remove(iws)

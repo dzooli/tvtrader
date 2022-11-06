@@ -1,12 +1,12 @@
-from sanic.config import Config
 from os import getenv
+from sanic.config import Config
 
 
 class AppConfig(Config):
     # User configurable values
     DEV = getenv("TVTRADER_DEV", "True") == "True"
     VERBOSE = getenv("TVTRADER_VERBOSE", "True") == "True"
-    GR_TIMEOUT = int(getenv("TVTRADER_ALERT_TIMEOUT", 15))
+    GR_TIMEOUT = int(getenv("TVTRADER_ALERT_TIMEOUT", "15"))
     GR_ENABLED = getenv("TVTRADER_GRAFANA_SEND", "True") == "True"
     TIMEZONE = getenv("TVTRADER_TIMEZONE", "Europe/Budapest")
     # Internal configuration

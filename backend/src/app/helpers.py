@@ -1,8 +1,7 @@
-import json as js
+import time
 from datetime import datetime
 from typing import Dict
 from pytz import timezone
-import time
 from sanic import Sanic
 from sanic.log import logger
 

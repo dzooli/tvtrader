@@ -1,13 +1,14 @@
-from sanic.worker.manager import WorkerManager
-from sanic.log import logger
-from sanic_ext import validate
-from sanic_ext import Config
-from sanic_openapi import openapi2_blueprint, doc
-from sanic.response import json
-from sanic import Sanic
+from __future__ import annotations
 import time
 import socket
 import attrs
+
+from sanic.worker.manager import WorkerManager
+from sanic.log import logger
+from sanic_ext import validate, Config
+from sanic_openapi import openapi2_blueprint, doc
+from sanic.response import json
+from sanic import Sanic
 
 from src.config import AppConfig
 from src.app.context import TvTraderContext
@@ -39,6 +40,14 @@ app.blueprint(openapi2_blueprint)
 @doc.summary("Healthcheck endpoint")
 @doc.response(200, SuccessResponseSchema, description="Success")
 def check(request):
+    """Healthcheck endpoint
+
+    Args:
+        request requests.Request: The HTTP request
+
+    Returns:
+        HTTPResponse: The health status
+    """
     return json({"status": 200, "message": "HEALTHY " + app.config.APPNAME})
 
 
@@ -118,13 +127,13 @@ async def feed(request, ws):
     Websocket endpoint for the connected clients. Clients receive
     all the alerts received by the server via '/alert' POST endpoint.
     """
-    logger.debug("ws request: " + str(request))
+    logger.debug("ws request: %s", str(request))
     wsclients.add(ws)
     while True:
         data = None
         data = await ws.recv()
         if data is not None:
-            logger.debug("ws data received: " + str(data))
+            logger.debug("ws data received: %s", str(data))
             await ws.send(data)
 
 
