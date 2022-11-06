@@ -1,3 +1,9 @@
+"""
+    Main server process
+
+    File:       server.py
+    Author:     Zoltan Fabian <zoltan.dzooli.fabian@gmail.com>
+"""
 from __future__ import annotations
 import time
 import socket
@@ -19,7 +25,7 @@ import src.actions.websocket as actions_ws
 import src.app.helpers as helpers
 
 
-wsclients = set()
+wsclients: set = set()
 carbon_connection = None
 try:
     carbon_connection = socket.create_connection(
@@ -112,7 +118,8 @@ async def carbon_alert_post(request, body: TradingViewAlert):
     if timediff > (config.GR_TIMEOUT * 60):
         value = int((config.CARBON_SELL_VALUE + config.CARBON_BUY_VALUE) / 2)
     # Message prepare
-    msg = f'strat.{jsondata["name"]}.{jsondata["interval"]}.{jsondata["symbol"]} {value} {jsondata["timestamp"]}\n'
+    msg = f'strat.{jsondata["name"]}.{jsondata["interval"]}.{jsondata["symbol"]} \
+        {value} {jsondata["timestamp"]}\n'
     await actions_carbon.send_metric(msg)
     return json({"status": 200, "message": "OK"})
 
