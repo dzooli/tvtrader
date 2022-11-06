@@ -5,4 +5,5 @@ venv/**
 reports/*/*.json
 reports/*/*.xml
 .coverage
+**/__pycache__
 
