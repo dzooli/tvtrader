@@ -6,4 +6,6 @@ reports/*/*.json
 reports/*/*.xml
 .coverage
 **/__pycache__
+**/.pytest_cache
+
 
