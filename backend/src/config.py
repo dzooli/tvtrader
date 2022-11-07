@@ -14,7 +14,6 @@ class AppConfig(Config):
     PORT = 8089
     KEEP_ALIVE_TIMEOUT = 60
     ERROR_FORMAT = 'json'
-    FALLBACK_ERROR_FORMAT = 'text'
     API_TITLE = "TvTrader API"
     API_VERSION = "1.0.0"
     API_DESCRIPTION = "TradingView alert helper API"
