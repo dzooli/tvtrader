@@ -1,15 +1,28 @@
-from types import SimpleNamespace
+"""
+    Application context definition
+
+    File:       context.py
+    Author:     Zoltan Fabian <zoltan.dzooli.fabian>
+"""
 import socket
+from types import SimpleNamespace
 
 
 class TvTraderContext(SimpleNamespace):
-    _carbon_sock = None
+    """Application context class
+    """
+    _carbon_sock: socket.socket = None
 
     def __init__(self, **kwargs: any) -> None:
         super().__init__(**kwargs)
 
     @property
-    def carbon_sock(self):
+    def carbon_sock(self) -> socket.socket | None:
+        """Getter for the Carbon connection socket
+
+        Returns:
+            socket.socket | None: Connection socket for the Carbon instance.
+        """
         return self._carbon_sock
 
     @carbon_sock.setter
