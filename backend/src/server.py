@@ -72,14 +72,9 @@ async def alert_post(request, body: TradingViewAlert):
     """
     Alert POST endpoint to proxy the alerts to the frontend application.
     """
-    try:
-        jsondata = attrs.asdict(body)
-        helpers.add_timezone_info(jsondata, Sanic.get_app())
-        helpers.format_json_input(jsondata)
-    except Exception as ex:
-        return json(
-            {"description": str(ex), "message": "ERROR", "status": 400}, status=400
-        )
+    jsondata = attrs.asdict(body)
+    helpers.add_timezone_info(jsondata, Sanic.get_app())
+    helpers.format_json_input(jsondata)
     await actions_ws.send_metric(jsondata, wsclients)
     return json({"status": 200, "message": "OK"})
 
@@ -114,7 +109,8 @@ async def carbon_alert_post(request, body: TradingViewAlert):
         if jsondata["direction"] == "SELL"
         else config.CARBON_BUY_VALUE
     )
-    timediff = int(time.time()) - (jsondata["timestamp"] + jsondata["utcoffset"])
+    timediff = int(time.time()) - \
+        (jsondata["timestamp"] + jsondata["utcoffset"])
     if timediff > (config.GR_TIMEOUT * 60):
         value = int((config.CARBON_SELL_VALUE + config.CARBON_BUY_VALUE) / 2)
     # Message prepare
