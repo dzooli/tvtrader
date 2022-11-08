@@ -17,7 +17,7 @@ class TvTraderContext(SimpleNamespace):
         super().__init__(**kwargs)
 
     @property
-    def carbon_sock(self) -> socket.socket | None:
+    def carbon_sock(self) -> socket.socket:
         """Getter for the Carbon connection socket
 
         Returns:

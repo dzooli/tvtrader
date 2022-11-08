@@ -13,7 +13,7 @@ class TradingViewAlert:
     direction: str = field(
         validator=[validators.matches_re("(buy|sell|close.*)", flags=re.IGNORECASE)]
     )
-    price: float | int = field(validator=[validators.gt(0.0)])
+    price: float = field(validator=[validators.gt(0.0)])
     timestamp: str = field(validator=[validators.min_len(10)])
 
 
