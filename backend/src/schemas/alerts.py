@@ -1,11 +1,11 @@
 from __future__ import annotations
 import re
-from attrs import define, validators, field
+from attrs import field, define, validators
 from sanic_openapi import doc
 
 
 @define
-class TradingViewAlert(object):
+class TradingViewAlert:
     id: int = field(validator=[validators.ge(0)])
     name: str = field(validator=[validators.min_len(1)])
     symbol: str = field(validator=[validators.min_len(1)])

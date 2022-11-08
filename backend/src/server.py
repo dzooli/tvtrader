@@ -12,9 +12,10 @@ import attrs
 from sanic.worker.manager import WorkerManager
 from sanic.log import logger
 from sanic_ext import validate, Config
+from sanic_ext.exceptions import ValidationError
 from sanic_openapi import openapi2_blueprint, doc
 from sanic.response import json
-from sanic import Sanic
+from sanic import Sanic, Request, HTTPResponse
 
 from src.config import AppConfig
 from src.app.context import TvTraderContext
@@ -37,19 +38,32 @@ except ConnectionRefusedError:
 appctx = TvTraderContext()
 appctx.carbon_sock = carbon_connection
 app = Sanic("TvTrader", config=AppConfig(), configure_logging=True, ctx=appctx)
-app.extend(config=Config(oas=False))
+app.extend(config=Config(oas=False, health=True, health_endpoint=True))
 app.blueprint(openapi2_blueprint)
+
+@app.exception(ValidationError, ValueError)
+def handle_validation_errors(request: Request, exception) -> HTTPResponse:
+    """Respond with a valid JSON object upon validation exception.
+
+    Args:
+        request (Request): Incoming request
+        exception (Exception): ValidationError or ValueError raised upon input validation.
+
+    Returns:
+        HTTPResponse: The formatted HTTP response
+    """
+    return json(body={"description": str(exception), "message": 'ERROR', "status": 400}, status=400)
 
 
 @app.get("/")
 @doc.tag("Backend")
 @doc.summary("Healthcheck endpoint")
 @doc.response(200, SuccessResponseSchema, description="Success")
-def check(request):
+async def check(request: Request) -> HTTPResponse:
     """Healthcheck endpoint
 
     Args:
-        request requests.Request: The HTTP request
+        request (Request): The HTTP request
 
     Returns:
         HTTPResponse: The health status
@@ -65,7 +79,7 @@ def check(request):
 @doc.response(
     400,
     ErrorResponseSchema,
-    description="Error. See 'message' property in the response",
+    description="Error. See 'description' property in the response",
 )
 @validate(json=TradingViewAlert)
 async def alert_post(request, body: TradingViewAlert):
@@ -87,21 +101,16 @@ async def alert_post(request, body: TradingViewAlert):
 @doc.response(
     400,
     ErrorResponseSchema,
-    description="Error. See 'message' property in the response",
+    description="Error. See 'description' property in the response",
 )
 @validate(json=TradingViewAlert)
 async def carbon_alert_post(request, body: TradingViewAlert):
     """
     Alert POST endpoint to forward the alerts to a Carbon server.
     """
-    try:
-        jsondata = attrs.asdict(body)
-        helpers.add_timezone_info(jsondata, Sanic.get_app())
-        helpers.format_json_input(jsondata)
-    except Exception as ex:
-        return json(
-            {"description": str(ex), "message": "ERROR", "status": 400}, status=400
-        )
+    jsondata = attrs.asdict(body)
+    helpers.add_timezone_info(jsondata, Sanic.get_app())
+    helpers.format_json_input(jsondata)
     # Message meaning conversion to numbers
     config = Sanic.get_app().config
     value = (
