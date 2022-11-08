@@ -1,6 +1,8 @@
 *.code-workspace
 .vscode
 venv/**
+venv-linux/**
+venv-prod/**
 !reports/allure/.gitkeep
 reports/*/*.json
 reports/*/*.xml
