@@ -41,16 +41,18 @@ app = Sanic("TvTrader", config=AppConfig(), configure_logging=True, ctx=appctx)
 app.extend(config=Config(oas=False, health=True, health_endpoint=True))
 app.blueprint(openapi2_blueprint)
 
+
 @app.exception(ValidationError, ValueError)
 def handle_validation_errors(request: Request, exception) -> HTTPResponse:
-    """Respond with a valid JSON object upon validation exception.
+    """
+    Handle validation errors with a proper JSON response.
 
     Args:
-        request (Request): Incoming request
-        exception (Exception): ValidationError or ValueError raised upon input validation.
+        request (Request): The incoming request
+        exception (_type_): Validation exception to handle.
 
     Returns:
-        HTTPResponse: The formatted HTTP response
+        HTTPResponse: _description_
     """
     return json(body={"description": str(exception), "message": 'ERROR', "status": 400}, status=400)
 
@@ -60,7 +62,8 @@ def handle_validation_errors(request: Request, exception) -> HTTPResponse:
 @doc.summary("Healthcheck endpoint")
 @doc.response(200, SuccessResponseSchema, description="Success")
 async def check(request: Request) -> HTTPResponse:
-    """Healthcheck endpoint
+    """
+    Healthcheck endpoint.
 
     Args:
         request (Request): The HTTP request
@@ -134,7 +137,7 @@ async def carbon_alert_post(request, body: TradingViewAlert):
 @app.websocket("/wsalerts")
 async def feed(request, ws):
     """
-    Websocket endpoint
+    Websocket endpoint.
 
     Websocket endpoint for the connected clients. Clients receive
     all the alerts received by the server via '/alert' POST endpoint.
