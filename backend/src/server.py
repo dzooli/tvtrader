@@ -5,6 +5,7 @@
     Author:     Zoltan Fabian <zoltan.dzooli.fabian@gmail.com>
 """
 from __future__ import annotations
+from multiprocessing import Queue
 import time
 import socket
 import attrs
@@ -38,8 +39,13 @@ except ConnectionRefusedError:
 appctx = TvTraderContext()
 appctx.carbon_sock = carbon_connection
 app = Sanic("TvTrader", config=AppConfig(), configure_logging=True, ctx=appctx)
-app.extend(config=Config(oas=False, health=True, health_endpoint=True))
+app.extend(config=Config(oas=False, health=True, health_endpoint=True, logging=True))
 app.blueprint(openapi2_blueprint)
+
+
+@app.main_process_start
+async def main_process_start(app):
+    app.shared_ctx.logger_queue = Queue()
 
 
 @app.exception(ValidationError, ValueError)
