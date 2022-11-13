@@ -37,6 +37,9 @@
 .buy {
   background-color: forestgreen;
 }
+.close {
+  background-color: orange;
+}
 .timeout {
   background-color: darkgrey;
 }

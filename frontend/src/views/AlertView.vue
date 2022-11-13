@@ -51,7 +51,7 @@ export default {
         return;
       }
 
-      this.$axios.post("/", newAlert).catch((error) => {
+      this.$axios.post("/alert", newAlert).catch((error) => {
         this.$toast.danger(error.toString());
       });
     },

@@ -4,11 +4,12 @@ POST http://localhost:8089/alert
 Content-Type: application/json
 
 {
-    "stratId": 0,
-    "stratName": "HELLO",
+    "id": 0,
+    "name": "HELLO",
     "symbol": "FXCM:GBPUSD",
     "interval": 15,
     "direction": "SELL",
+    "price": 1.1,
     "timestamp": "2019-08-27T09:56:00Z"
 }
 ###
@@ -18,11 +19,12 @@ POST http://localhost:8089/alert
 Content-Type: application/json
 
 {
-    "stratId": 0,
-    "stratName": "HELLO",
+    "id": 0,
+    "name": "HELLO",
     "symbol": "FXCM:GBPUSD",
     "interval": 15,
     "direction": "buy",
+    "price": 1.1,
     "timestamp": "2019-08-27T09:56:00Z"
 }
 ###
@@ -32,11 +34,12 @@ POST http://localhost:8089/alert
 Content-Type: application/json
 
 {
-    "stratId": 0,
-    "stratName": "HELLO",
+    "id": 0,
+    "name": "HELLO",
     "symbol": "FXCM:GBPUSD",
     "interval": 15,
     "direction": "Close entry(s) order long",
+    "price": 1.1,
     "timestamp": "2019-08-27T09:56:00Z"
 }
 ###
@@ -46,11 +49,12 @@ POST http://localhost:8089/alert
 Content-Type: application/json
 
 {
-    "stratId": 0,
-    "stratName": "HELLO",
+    "id": 0,
+    "name": "HELLO",
     "symbol": "FXCM:GBPUSD",
     "interval": 15,
     "direction": "Close entry(s) order short",
+    "price": 1.1,
     "timestamp": "2019-08-27T09:56:00Z"
 }
 ###
@@ -60,8 +64,8 @@ POST http://localhost:8089/alert
 Content-Type: application/json
 
 {
-    "stratId": 0,
-    "stratName": "HELLO",
+    "id": 0,
+    "name": "HELLO",
     "symbol": "FXCM:GBPUSD",
     "interval": 15,
     "direction": "Cloxe entry(s) order short",
@@ -74,8 +78,8 @@ POST http://localhost:8089/alert
 Content-Type: application/json
 
 {
-    "stratId": 0,
-    "stratName": "HELLO",
+    "id": 0,
+    "name": "HELLO",
     "symbol": "FXCM:GBPUSD",
     "direction": "SELL",
     "timestamp": "2019-08-27T09:56:00Z"

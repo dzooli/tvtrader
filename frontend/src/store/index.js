@@ -35,15 +35,15 @@ export default new Vuex.Store({
       }
     },
 
-    addAlert(state, { stratId, stratName, symbol, direction, timestamp }) {
+    addAlert(state, { id, name, symbol, direction, timestamp }) {
       let itemExists =
         state.alerts.find(function (current) {
           return current.timestamp == this;
         }, timestamp) || undefined;
       if (itemExists == undefined) {
         state.alerts.unshift({
-          stratId: stratId,
-          stratName: stratName,
+          stratId: id,
+          stratName: name,
           symbol: symbol,
           direction: direction,
           timestamp: timestamp,
