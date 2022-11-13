@@ -63,7 +63,7 @@ def handle_validation_errors(request: Request, exception) -> HTTPResponse:
     return json(body={"description": str(exception), "message": 'ERROR', "status": 400}, status=400)
 
 
-@app.get("/")
+@app.route("/", methods=["GET"])
 @doc.tag("Backend")
 @doc.summary("Healthcheck endpoint")
 @doc.response(200, SuccessResponseSchema, description="Success")
@@ -80,7 +80,7 @@ async def check(request: Request) -> HTTPResponse:
     return json({"status": 200, "message": "HEALTHY " + app.config.APPNAME})
 
 
-@app.post("/alert")
+@app.route("/alert", methods=["POST"])
 @doc.tag("Frontend")
 @doc.operation("frontendAlert")
 @doc.consumes(TradingViewAlertSchema, location="body")
@@ -102,7 +102,7 @@ async def alert_post(request, body: TradingViewAlert):
     return json({"status": 200, "message": "OK"})
 
 
-@app.post("/carbon-alert")
+@app.route("/carbon-alert", methods=["POST"])
 @doc.tag("Backend")
 @doc.operation("carbonAlert")
 @doc.consumes(TradingViewAlertSchema, location="body")
