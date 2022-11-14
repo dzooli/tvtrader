@@ -33,5 +33,6 @@ node_modules
 
 /backend/venv
 .pytest_cache
+.mypy_cache
 
 
