@@ -66,6 +66,12 @@ export default new Vuex.Store({
       if (state.alerts.length > state.maxAlerts) {
         state.alerts.splice(state.alerts.length - 1, 1);
       }
+
+      /* 
+      TODO: closing logic
+        - if direction contains Close
+            - find all active alerts with the same id, name, symbol and set the status to "closed"
+      */
     },
 
     setDevMode(state, mode) {
