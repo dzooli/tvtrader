@@ -36,11 +36,20 @@ export default new Vuex.Store({
     },
 
     addAlert(state, { id, name, symbol, direction, timestamp }) {
-      let itemExists =
-        state.alerts.find(function (current) {
-          return current.timestamp == this;
-        }, timestamp) || undefined;
-      if (itemExists == undefined) {
+      // Find existing alert on same strat and pair
+      let itemExists = state.alerts.findIndex(
+        function (current) {
+          return (
+            //current.timestamp == this.timestamp &&
+            current.stratId == this.id &&
+            current.stratName == this.name &&
+            current.symbol == this.symbol
+          );
+        },
+        { timestamp: timestamp, id: id, name: name, symbol: symbol }
+      );
+      // No existing alert => add to list
+      if (itemExists == -1) {
         state.alerts.unshift({
           stratId: id,
           stratName: name,
@@ -79,8 +88,8 @@ export default new Vuex.Store({
       for (let el of state.alerts) {
         el.status =
           Date.now() / 1000 - el.timestamp > state.alertTimeout * 60
-            ? "invalidated"
-            : "active";
+            ? "invalidated" // invalidate the alert on timeout
+            : el.status; // Status not changed
       }
     },
 

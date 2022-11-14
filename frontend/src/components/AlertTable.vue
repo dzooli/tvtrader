@@ -86,7 +86,6 @@ export default {
     this.$store.commit("startAlertTimer", this.updateAlertsTimeOut);
     this.wsconnection = new WebSocket(this.$store.getters.wsURL);
     this.wsconnection.onmessage = (event) => {
-      console.log("websocket event received: " + event.data.toString());
       this.$store.commit("addAlert", JSON.parse(event.data));
     };
     this.wsconnection.onclose = () => {
