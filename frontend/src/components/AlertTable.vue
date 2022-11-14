@@ -37,10 +37,10 @@
 .buy {
   background-color: forestgreen;
 }
-.close {
+.closed {
   background-color: orange;
 }
-.timeout {
+.invalidated {
   background-color: darkgrey;
 }
 .v-data-table-header {
@@ -86,6 +86,7 @@ export default {
     this.$store.commit("startAlertTimer", this.updateAlertsTimeOut);
     this.wsconnection = new WebSocket(this.$store.getters.wsURL);
     this.wsconnection.onmessage = (event) => {
+      console.log("websocket event received: " + event.data.toString());
       this.$store.commit("addAlert", JSON.parse(event.data));
     };
     this.wsconnection.onclose = () => {
@@ -118,12 +119,12 @@ export default {
 
   methods: {
     getRowClass(alert) {
-      let baseclass = "item-row ";
-      return alert.timedout
-        ? baseclass + "timedout"
-        : alert.direction == "SELL"
-        ? baseclass + "sell"
-        : baseclass + "buy";
+      return (
+        "item-row " +
+        alert.status +
+        " " +
+        (alert.direction == "SELL" ? "sell" : "buy")
+      );
     },
 
     getRowId(item) {

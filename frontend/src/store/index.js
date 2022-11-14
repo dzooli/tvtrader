@@ -47,10 +47,10 @@ export default new Vuex.Store({
           symbol: symbol,
           direction: direction,
           timestamp: timestamp,
-          timedout:
+          status:
             Date.now() / 1000 - timestamp > state.alertTimeout * 60
-              ? true
-              : false,
+              ? "active"
+              : "invalidated",
         });
       }
       // Cut the list to max items
@@ -77,10 +77,10 @@ export default new Vuex.Store({
 
     updateAlertsTimeOut(state) {
       for (let el of state.alerts) {
-        el.timedout =
+        el.status =
           Date.now() / 1000 - el.timestamp > state.alertTimeout * 60
-            ? true
-            : false;
+            ? "invalidated"
+            : "active";
       }
     },
 
