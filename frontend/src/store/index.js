@@ -40,7 +40,7 @@ export default new Vuex.Store({
       let itemExists = state.alerts.findIndex(
         function (current) {
           return (
-            //current.timestamp == this.timestamp &&
+            current.timestamp == this.timestamp &&
             current.stratId == this.id &&
             current.stratName == this.name &&
             current.symbol == this.symbol
