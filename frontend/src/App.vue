@@ -1,22 +1,30 @@
 <template>
   <v-app>
-    <NavBar />
+    <v-app-bar app>
+      <NavBar />
+    </v-app-bar>
     <v-main>
-      <v-toast />
-      <router-view />
+      <v-container fluid>
+        <v-toast />
+        <router-view />
+      </v-container>
     </v-main>
+    <v-footer app padless>
+      <AlertLegends />
+    </v-footer>
   </v-app>
 </template>
 
 <script>
 import NavBar from "@/components/NavBar.vue";
+import AlertLegends from "@/components/AlertLegends.vue";
 import { VToast } from "vuetify-snackbar-toast";
 export default {
   name: "App",
   data() {
     return {};
   },
-  components: { NavBar, VToast },
+  components: { NavBar, AlertLegends, VToast },
   beforeMount() {
     this.$store.commit(
       "initialize",
