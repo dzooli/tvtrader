@@ -36,6 +36,26 @@ export default new Vuex.Store({
     },
 
     addAlert(state, { id, name, symbol, direction, timestamp }) {
+      // Close first
+      if (direction.toUpperCase().startsWith("CLOSE")) {
+        let closing = false;
+        for (let el of state.alerts) {
+          let curr = {
+            id,
+            name,
+            symbol,
+          };
+
+          if (el.stratName == name && el.stratId == id && el.symbol == symbol) {
+            el.status = "closed";
+            closing = true;
+          }
+        }
+        if (closing) {
+          return;
+        }
+      }
+
       // Find existing alert on same strat and pair
       let itemExists = state.alerts.findIndex(
         function (current) {
@@ -66,12 +86,6 @@ export default new Vuex.Store({
       if (state.alerts.length > state.maxAlerts) {
         state.alerts.splice(state.alerts.length - 1, 1);
       }
-
-      /* 
-      TODO: closing logic
-        - if direction contains Close
-            - find all active alerts with the same id, name, symbol and set the status to "closed"
-      */
     },
 
     setDevMode(state, mode) {
@@ -93,7 +107,8 @@ export default new Vuex.Store({
     updateAlertsTimeOut(state) {
       for (let el of state.alerts) {
         el.status =
-          Date.now() / 1000 - el.timestamp > state.alertTimeout * 60
+          Date.now() / 1000 - el.timestamp > state.alertTimeout * 60 &&
+          el.status != "closed"
             ? "invalidated" // invalidate the alert on timeout
             : el.status; // Status not changed
       }
