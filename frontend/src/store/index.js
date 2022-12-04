@@ -40,12 +40,6 @@ export default new Vuex.Store({
       if (direction.toUpperCase().startsWith("CLOSE")) {
         let closing = false;
         for (let el of state.alerts) {
-          let curr = {
-            id,
-            name,
-            symbol,
-          };
-
           if (el.stratName == name && el.stratId == id && el.symbol == symbol) {
             el.status = "closed";
             closing = true;
