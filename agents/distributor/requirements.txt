@@ -1,0 +1,16 @@
+aio-pika==8.3.0
+aiormq==6.6.4
+black==23.1.0
+click==8.1.3
+colorama==0.4.6
+idna==3.4
+multidict==6.0.4
+mypy-extensions==0.4.3
+packaging==23.0
+pamqp==3.2.1
+pathspec==0.11.0
+platformdirs==2.6.2
+tomli==2.0.1
+ws4py==0.5.1
+wsaccel==0.6.4
+yarl==1.8.2
