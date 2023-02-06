@@ -5,8 +5,8 @@ import logging
 
 from ws4py.client.threadedclient import WebSocketClient
 
-from .connector import TargetConnector
-from .exception import InvalidTargetConnectionException, ConnectionNotDefined
+from .connector import DistributionTarget
+from .exception import InvalidDistributionTarget, ConnectionNotDefined
 
 class DistributorClient():
     pass
@@ -14,7 +14,7 @@ class DistributorClient(WebSocketClient):
     def __init__(self, *args, **kwargs):
         self._logger = None
         self._connection_defined = False
-        self._target: TargetConnector = None
+        self._target: DistributionTarget = None
         WebSocketClient.__init__(self, *args, **kwargs)
 
     @property
@@ -26,11 +26,11 @@ class DistributorClient(WebSocketClient):
         self._logger = logger
 
     @property
-    def target_connector(self) -> TargetConnector:
+    def target_connector(self) -> DistributionTarget:
         return self._target
 
     @target_connector.setter
-    def target_connector(self, target: TargetConnector) -> DistributorClient:
+    def target_connector(self, target: DistributionTarget) -> DistributorClient:
         """
         Set the distribution target connector
 
@@ -40,8 +40,8 @@ class DistributorClient(WebSocketClient):
         Raises:
             InvalidTargetConnectionException: Raised when the connector is not a subclass of TargetConnector
         """
-        if not issubclass(target, TargetConnector):
-            raise InvalidTargetConnectionException()
+        if not issubclass(target, DistributionTarget):
+            raise InvalidDistributionTarget()
         self._target = target
         self._connection_defined = True
         return self
