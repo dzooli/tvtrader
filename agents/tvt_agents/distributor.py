@@ -1,21 +1,60 @@
+from future import __annotations__
+import ws4py
+import wsaccel
 import logging
+
 from ws4py.client.threadedclient import WebSocketClient
 
+from .connector import TargetConnector
+from .exception import InvalidTargetConnectionException, ConnectionNotDefined
 
-class RabbitDistributor(WebSocketClient):
-    """Distribute to a RabbitMQ topic exchange"""
-
+class DistributorClient():
+    pass
+class DistributorClient(WebSocketClient):
     def __init__(self, *args, **kwargs):
-        self.logger: logging.Logger = logging.getLogger()
-        super().__init__(*args, **kwargs)
+        self._logger = None
+        self._connection_defined = False
+        self._target: TargetConnector = None
+        WebSocketClient.__init__(self, *args, **kwargs)
+
+    @property
+    def logger(self):
+        return self._logger
+
+    @logger.setter
+    def logger(self, logger):
+        self._logger = logger
+
+    @property
+    def target_connector(self) -> TargetConnector:
+        return self._target
+
+    @target_connector.setter
+    def target_connector(self, target: TargetConnector) -> DistributorClient:
+        """
+        Set the distribution target connector
+
+        Args:
+            target (TargetConnector): The connector object for the target.
+
+        Raises:
+            InvalidTargetConnectionException: Raised when the connector is not a subclass of TargetConnector
+        """
+        if not issubclass(target, TargetConnector):
+            raise InvalidTargetConnectionException()
+        self._target = target
+        self._connection_defined = True
+        return self
 
     def opened(self):
-        self.logger.info("WS opened successfully")
+        self._logger.info("WS opened successfully")
 
     def closed(self, code, reason=None):
-        self.logger.info("Closed down: %d, %d" % (code, reason))
+        self._logger.info(f"Closed down: {code}, {reason}")
 
-    def received_message(self, message):
-        self.logger.info("Message received: %s" % message)
-        if len(message) >= 175:
-            self.close(reason="Example exited")
+    def received_message(self, m):
+        if not self._connection_defined:
+            raise ConnectionNotDefined("The distribution target is not defined!")
+        print(f"{m}")
+        if len(m) >= 175:
+            self.close(reason="Bye bye")
