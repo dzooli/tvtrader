@@ -9,10 +9,11 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 aio-pika = "^8.3.0"
 wsaccel = "^0.6.4"
 ws4py = "^0.5.1"
+future = "^0.18.3"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -22,7 +23,7 @@ black = "^23.1.0"
 poetry-dynamic-versioning = "^0.21.3"
 
 [tool.poetry-dynamic-versioning]
-enable=true
+enable=false
 vcs="git"
 #style="semver"
 format="{base}.{distance}-{commit}"
