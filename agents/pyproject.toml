@@ -14,7 +14,6 @@ aio-pika = "^8.3.0"
 wsaccel = "^0.6.4"
 ws4py = "^0.5.1"
 future = "^0.18.3"
-urllib3 = "^1.26.14"
 
 
 [tool.poetry.group.dev.dependencies]
