@@ -1,21 +1,28 @@
-from future import __annotations__
-import ws4py
-import wsaccel
-import logging
+from time import time_ns
+from typing import List
+from .connector import AbstractDistributionTarget, AbstractDistributionSource
 
 from ws4py.client.threadedclient import WebSocketClient
 
-from .connector import DistributionTarget
-from .exception import InvalidDistributionTarget, ConnectionNotDefined
 
-class DistributorClient():
-    pass
-class DistributorClient(WebSocketClient):
-    def __init__(self, *args, **kwargs):
+class WSSource(AbstractDistributionSource):
+    def on_connect(self):
+        return super().on_connect()
+
+    def on_disconnect(self, code, reason=None):
+        return super().on_disconnect(code, reason)
+
+    def on_message(self, message):
+        return super().on_message(message)
+
+
+class AlertDistributor:
+    def __init__(self):
         self._logger = None
-        self._connection_defined = False
-        self._target: DistributionTarget = None
-        WebSocketClient.__init__(self, *args, **kwargs)
+        self._counter = 0
+        self._queue = []
+        self._sources: List[AbstractDistributionSource] = []
+        self._targets: List[AbstractDistributionTarget] = []
 
     @property
     def logger(self):
@@ -25,36 +32,48 @@ class DistributorClient(WebSocketClient):
     def logger(self, logger):
         self._logger = logger
 
-    @property
-    def target_connector(self) -> DistributionTarget:
-        return self._target
+    def add_source(self, source: AbstractDistributionSource):
+        self._sources.append(source)
+        self._sources[-1].on_message = self.enqueue
+        if self.logger:
+            self._logger.info("source added")
 
-    @target_connector.setter
-    def target_connector(self, target: DistributionTarget) -> DistributorClient:
-        """
-        Set the distribution target connector
+    def add_target(self, target: AbstractDistributionTarget):
+        self._targets.append(target)
+        if self.logger:
+            self._logger.info("target added")
 
-        Args:
-            target (TargetConnector): The connector object for the target.
+    def enqueue(self, message):
+        self._queue.append(str(message))
+        if self.logger:
+            self._logger.info("message enqueued...")
 
-        Raises:
-            InvalidTargetConnectionException: Raised when the connector is not a subclass of TargetConnector
-        """
-        if not issubclass(target, DistributionTarget):
-            raise InvalidDistributionTarget()
-        self._target = target
-        self._connection_defined = True
-        return self
+    def run(self, sleep_nano=5e-9):
+        while True:
+            no_message = False
+            try:
+                last_msg = self._queue.pop()
+            except IndexError:
+                no_message = True
+            if not no_message:
+                for target in self._targets:
+                    target.send(last_msg)
+                    if self.logger:
+                        self._logger.info("message sent")
+            sleep_start = time_ns()
+            sleep_elapsed = 0
+            while sleep_elapsed < sleep_nano:
+                sleep_elapsed = time_ns() - sleep_start
 
-    def opened(self):
-        self._logger.info("WS opened successfully")
-
-    def closed(self, code, reason=None):
-        self._logger.info(f"Closed down: {code}, {reason}")
-
-    def received_message(self, m):
-        if not self._connection_defined:
-            raise ConnectionNotDefined("The distribution target is not defined!")
-        print(f"{m}")
-        if len(m) >= 175:
-            self.close(reason="Bye bye")
+    def shutdown(self):
+        for source in self._sources.copy():
+            source.on_disconnect(
+                AbstractDistributionSource.DISCONNECT_SHUTDOWN, "shutdown by runner"
+            )
+        for target in self._targets.copy():
+            target.close()
+        while True:
+            try:
+                self._queue.pop()
+            except IndexError:
+                break
