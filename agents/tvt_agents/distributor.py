@@ -1,4 +1,4 @@
-from time import time_ns
+from time import sleep
 from typing import List
 from .connector import AbstractDistributionTarget, AbstractDistributionSource
 
@@ -48,7 +48,7 @@ class AlertDistributor:
         if self.logger:
             self._logger.info("message enqueued...")
 
-    def run(self, sleep_nano=5e-9):
+    def run(self, sleep_sec=0.5):
         while True:
             no_message = False
             try:
@@ -60,10 +60,7 @@ class AlertDistributor:
                     target.send(last_msg)
                     if self.logger:
                         self._logger.info("message sent")
-            sleep_start = time_ns()
-            sleep_elapsed = 0
-            while sleep_elapsed < sleep_nano:
-                sleep_elapsed = time_ns() - sleep_start
+            sleep(sleep_sec)
 
     def shutdown(self):
         for source in self._sources.copy():
