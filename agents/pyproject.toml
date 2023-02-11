@@ -13,7 +13,7 @@ python = "^3.10"
 aio-pika = "^8.3.0"
 wsaccel = "^0.6.4"
 ws4py = "^0.5.1"
-future = "^0.18.3"
+mkdocs = {version = "^1.4.2", extras = ["docs"]}
 
 
 [tool.poetry.group.dev.dependencies]
