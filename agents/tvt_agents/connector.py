@@ -19,16 +19,16 @@ class AbstractDistributionSource(metaclass=ABCMeta):
     DISCONNECT_RECONNECT = 2
 
     @abstractmethod
-    def on_connect(self):
-        raise NotImplementedError()
+    def connect(self):
+        pass
 
     @abstractmethod
-    def on_message(self, message):
-        raise NotImplementedError()
+    def set_on_message(self, message_function):
+        pass
 
     @abstractmethod
-    def on_disconnect(self, code, reason=None):
-        raise NotImplementedError()
+    def close(self, code=1000, reason=""):
+        pass
 
 
 class AbstractDistributionTarget(metaclass=ABCMeta):
