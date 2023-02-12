@@ -2,7 +2,8 @@ import logging
 import wsaccel
 import ws4py
 
-from .distributor import AlertDistributor, WSSource
+from .distributor.source import WebSocketSource
+from .distributor import Distributor
 
 
 logger = ws4py.configure_logger(level=logging.DEBUG)
@@ -11,15 +12,15 @@ if __name__ == "__main__":
     logger.info("agents package main started...")
 
     wsaccel.patch_ws4py()
-    dist = AlertDistributor()
+    dist = Distributor()
     dist.logger = logger
-    ws_source = WSSource(
+    ws_source = WebSocketSource(
         "wss://socketsbay.com/wss/v2/1/demo/",
         protocols=["http-only", "chat"],
         logger=logger,
     )
     dist.add_source(ws_source)
-    ws_source.connect()
+    dist.connect()
 
     try:
         dist.run()
