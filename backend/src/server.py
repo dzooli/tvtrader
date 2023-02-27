@@ -5,27 +5,27 @@
     Author:     Zoltan Fabian <zoltan.dzooli.fabian@gmail.com>
 """
 from __future__ import annotations
-from multiprocessing import Queue
-import time
-import socket
-import attrs
 
-from sanic.worker.manager import WorkerManager
+import socket
+import time
+from multiprocessing import Queue
+
+import attrs
+from sanic import Sanic, Request, HTTPResponse
 from sanic.log import logger
+from sanic.response import json
+from sanic.worker.manager import WorkerManager
 from sanic_ext import validate, Config
 from sanic_ext.exceptions import ValidationError
 from sanic_openapi import openapi2_blueprint, doc
-from sanic.response import json
-from sanic import Sanic, Request, HTTPResponse
 
-from src.config import AppConfig
-from src.app.context import TvTraderContext
-from src.schemas.alerts import TradingViewAlert, TradingViewAlertSchema
-from src.schemas.responses import SuccessResponseSchema, ErrorResponseSchema
 import src.actions.carbon as actions_carbon
 import src.actions.websocket as actions_ws
 import src.app.helpers as helpers
-
+from src.app.context import TvTraderContext
+from src.config import AppConfig
+from src.schemas.alerts import TradingViewAlert, TradingViewAlertSchema
+from src.schemas.responses import SuccessResponseSchema, ErrorResponseSchema
 
 wsclients: set = set()
 carbon_connection = None
@@ -127,8 +127,7 @@ async def carbon_alert_post(request, body: TradingViewAlert):
         if jsondata["direction"] == "SELL"
         else config.CARBON_BUY_VALUE
     )
-    timediff = int(time.time()) - \
-        (jsondata["timestamp"] + jsondata["utcoffset"])
+    timediff = int(time.time()) - (jsondata["timestamp"] + jsondata["utcoffset"])
     if timediff > (config.GR_TIMEOUT * 60):
         value = int((config.CARBON_SELL_VALUE + config.CARBON_BUY_VALUE) / 2)
     # Message prepare
@@ -169,7 +168,7 @@ def teardown():
     sock = Sanic.get_app().ctx.carbon_sock
     try:
         del sock
-    except Exception:
+    except NameError:
         logger.error("Carbon connection close failed!")
 
 
