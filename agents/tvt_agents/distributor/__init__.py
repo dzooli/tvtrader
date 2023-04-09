@@ -6,6 +6,8 @@
 Alert distributor with multiple sources and targets
 
 """
+import asyncio
+from attrs import define, field, validators
 from time import sleep
 from typing import List, TypeVar
 from collections import deque
@@ -16,14 +18,14 @@ from .target import AbstractDistributionTarget
 CDistributor = TypeVar("CDistributor", bound="Distributor")
 
 
+@define
 class Distributor:
-    def __init__(self, delay: float = 0.2):
-        self._logger = None
-        self._message_counter = 0
-        self._queue = deque([])
-        self._sources: List[AbstractDistributionSource] = []
-        self._targets: List[AbstractDistributionTarget] = []
-        self._send_delay = delay
+    _logger = field(default=None)
+    _message_counter: int = field(default=0)
+    _queue = deque([])
+    _sources: List[AbstractDistributionSource] = []
+    _targets: List[AbstractDistributionTarget] = []
+    _send_delay = field(default=0.2, validator=validators.gt(0.0))
 
     @property
     def delay(self):
