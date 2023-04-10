@@ -6,7 +6,6 @@
 Alert distributor with multiple sources and targets
 
 """
-import asyncio
 from attrs import define, field, validators
 from time import sleep
 from typing import List, TypeVar
