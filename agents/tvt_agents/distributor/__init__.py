@@ -96,6 +96,7 @@ class Distributor:
         if self._logger:
             self._logger.debug("Starting equeue thread...")
         self._src_threadlist[-1].start()
+        # TODO: Prevent to fill the memory with finished threads
 
     def run(self):
         while True:
