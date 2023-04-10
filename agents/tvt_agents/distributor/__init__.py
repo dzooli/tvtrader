@@ -6,11 +6,13 @@
 Alert distributor with multiple sources and targets
 
 """
-from threading import Thread, Condition
+import logging
+import queue
+from threading import Thread
 from attrs import define, field, validators
 from time import sleep
 from typing import List, TypeVar
-from collections import deque
+from queue import Queue
 from .source import AbstractDistributionSource
 from .target import AbstractDistributionTarget
 
@@ -20,13 +22,13 @@ CDistributor = TypeVar("CDistributor", bound="Distributor")
 
 @define
 class Distributor:
-    _logger = field(default=None)
-    _message_counter: int = field(default=0)
-    _queue = deque([])
-    _srcthreadlist = []
-    _sources: List[AbstractDistributionSource] = []
-    _targets: List[AbstractDistributionTarget] = []
-    _send_delay = field(default=0.2, validator=validators.gt(0.0))
+    _shutdown_progress: bool = field(default=False)
+    _logger: logging.Logger = field(default=None)
+    _queue: Queue = field(factory=Queue)
+    _src_threadlist: list = field(factory=list)
+    _sources: List[AbstractDistributionSource] = field(factory=list)
+    _targets: List[AbstractDistributionTarget] = field(factory=list)
+    _send_delay: float = field(default=0.2, validator=validators.gt(0.0))
 
     @property
     def delay(self):
@@ -34,8 +36,6 @@ class Distributor:
 
     @delay.setter
     def delay(self, new_delay: float):
-        if new_delay < 0.0:
-            raise ValueError
         self._send_delay = new_delay
 
     @property
@@ -43,86 +43,106 @@ class Distributor:
         return self._logger
 
     @logger.setter
-    def logger(self, logger):
+    def logger(self, logger: logging.Logger):
         self._logger = logger
 
-    def add_source(self, source: AbstractDistributionSource):
-        self._sources.append(source)
-        self._sources[-1].set_on_message(self.thread_enqueue)
+    def add_source(self, src: AbstractDistributionSource):
+        self._sources.append(src)
+        self._sources[-1].set_on_message(self._thread_enqueue)
         if self._logger:
             self._logger.info("source added")
 
     def connect_sources(self):
         if self._logger:
             self._logger.debug("connecting sources...")
-        for source in self._sources:
-            source.connect()
+        for src in self._sources:
+            src.connect()
 
     def connect_targets(self):
         if self._logger:
             self._logger.debug("connecting targets...")
-        for target in self._targets:
-            target.open()
+        for tgt in self._targets:
+            tgt.open()
 
     def connect(self):
         self.connect_targets()
         self.connect_sources()
 
-    def add_target(self, target: AbstractDistributionTarget):
-        self._targets.append(target)
+    def add_target(self, tgt: AbstractDistributionTarget):
+        self._targets.append(tgt)
         if self._logger:
             self._logger.info("target added")
 
-    def enqueue(self, message):
-        try:
-            self._queue.append(str(message))
-        except Exception:
+    def _enqueue(self, message):
+        if self._shutdown_progress:
             if self._logger:
-                self._logger.error("failed to enqueue the message!")
+                self._logger.info("No new messages accepted, shutdown in progress")
             return
-        self._message_counter += 1
+        try:
+            self._queue.put_nowait(str(message))
+        except queue.Full:
+            if self._logger:
+                self._logger.error("failed to enqueue the message! Queue is full")
+            return
         if self._logger:
             self._logger.info("message enqueued...")
 
-    def thread_enqueue(self, message):
-        self._srcthreadlist.append(Thread(target=self.enqueue, kwargs={"message": message}))
+    def _thread_enqueue(self, message):
+        if self._shutdown_progress:
+            if self._logger:
+                self._logger.info("No new messages threaded, shutdown in progress")
+            return
+        self._src_threadlist.append(Thread(target=self._enqueue, kwargs={"message": message}))
         if self._logger:
             self._logger.debug("Starting equeue thread...")
-        self._srcthreadlist[-1].start()
+        self._src_threadlist[-1].start()
 
     def run(self):
         while True:
-            if len(self._queue):
-                last_msg = self._queue.pop()
-                if self._logger:
-                    self._logger.debug(
-                        f"sending message '{last_msg}' to all targets..."
-                    )
-                for target in self._targets:
-                    target.send(last_msg)
-                    if self._logger:
-                        self._logger.info("message sent")
+            while not self._queue.empty():
+                last_msg = self._queue.get()
+                self._send_to_all(last_msg)
+                self._queue.task_done()
             sleep(self._send_delay)
 
+    def _send_to_all(self, message):
+        if self._logger:
+            self._logger.debug(
+                f"sending message '{message}' to all targets..."
+            )
+        for tgt in self._targets:
+            tgt.send(message)
+            if self._logger:
+                self._logger.info("message sent")
+
+    def flush(self):
+        if self._logger:
+            self._logger.info("Flushing the queue...")
+        while not self._queue.empty():
+            last_msg = self._queue.get()
+            self._send_to_all(last_msg)
+            self._queue.task_done()
+
     def shutdown(self):
+        self._shutdown_progress = True
         if self._logger:
             self._logger.info("closing sources...")
-        for source in self._sources.copy():
-            source.close(
+        for src in self._sources.copy():
+            src.close(
                 code=AbstractDistributionSource.DISCONNECT_SHUTDOWN,
                 reason="shutdown by distributor",
             )
+
+        self.flush()
+
         if self._logger:
             self._logger.info("closing targets...")
-        for target in self._targets.copy():
-            target.close()
-        while True:
-            try:
-                self._queue.pop()
-            except IndexError:
-                break
+        for tgt in self._targets.copy():
+            tgt.close()
+
         if self._logger:
             self._logger.info("Waiting for queue threads to finish...")
         # shutting down the source queue threads
-        for t in self._srcthreadlist:
+        for t in self._src_threadlist:
             t.join()
+        self._shutdown_progress = False
