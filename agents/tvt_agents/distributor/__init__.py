@@ -6,6 +6,7 @@
 Alert distributor with multiple sources and targets
 
 """
+from threading import Thread, Condition
 from attrs import define, field, validators
 from time import sleep
 from typing import List, TypeVar
@@ -22,6 +23,7 @@ class Distributor:
     _logger = field(default=None)
     _message_counter: int = field(default=0)
     _queue = deque([])
+    _srcthreadlist = []
     _sources: List[AbstractDistributionSource] = []
     _targets: List[AbstractDistributionTarget] = []
     _send_delay = field(default=0.2, validator=validators.gt(0.0))
@@ -46,7 +48,7 @@ class Distributor:
 
     def add_source(self, source: AbstractDistributionSource):
         self._sources.append(source)
-        self._sources[-1].set_on_message(self.enqueue)
+        self._sources[-1].set_on_message(self.thread_enqueue)
         if self._logger:
             self._logger.info("source added")
 
@@ -74,12 +76,19 @@ class Distributor:
     def enqueue(self, message):
         try:
             self._queue.append(str(message))
-        except Exception as ex:
-            ex.add_note("Enqueue failed")
-            raise ex
+        except Exception:
+            if self._logger:
+                self._logger.error("failed to enqueue the message!")
+            return
         self._message_counter += 1
         if self._logger:
             self._logger.info("message enqueued...")
+
+    def thread_enqueue(self, message):
+        self._srcthreadlist.append(Thread(target=self.enqueue, kwargs={"message": message}))
+        if self._logger:
+            self._logger.debug("Starting equeue thread...")
+        self._srcthreadlist[-1].start()
 
     def run(self):
         while True:
@@ -112,3 +121,8 @@ class Distributor:
                 self._queue.pop()
             except IndexError:
                 break
+        if self._logger:
+            self._logger.info("Waiting for queue threads to finish...")
+        # shutting down the source queue threads
+        for t in self._srcthreadlist:
+            t.join()
