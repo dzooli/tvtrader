@@ -9,10 +9,11 @@ Alert distributor with multiple sources and targets
 import logging
 import queue
 from queue import Queue
-from threading import Thread
-from attrs import define, field, validators
 from time import sleep
+from threading import Thread
 from typing import List, TypeVar
+from attrs import define, field, validators
+
 from .source import AbstractDistributionSource
 from .target import AbstractDistributionTarget
 from .logutil import LoggingMixin
@@ -119,6 +120,6 @@ class Distributor(LoggingMixin):
 
         self.log(logging.INFO, "Waiting for queue threads to finish...")
         # shutting down the source queue threads
-        for t in self._src_threadlist:
-            t.join()
+        for c_thread in self._src_threadlist:
+            c_thread.join()
         self._shutdown_progress = False
