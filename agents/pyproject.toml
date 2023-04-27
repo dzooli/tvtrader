@@ -21,6 +21,7 @@ pytest = "^7.2.1"
 behave = "^1.2.6"
 black = "^23.1.0"
 poetry-dynamic-versioning = "^0.21.3"
+pylint = "^2.17.3"
 
 [tool.poetry-dynamic-versioning]
 enable=false

@@ -5,11 +5,19 @@ import ws4py
 from .distributor.source import WebSocketSource
 from .distributor import Distributor
 
+logger = None
 
-logger = ws4py.configure_logger(level=logging.DEBUG)
+
+def setup_logging(level: int = logging.DEBUG):
+    res_logger = ws4py.configure_logger(level=level)
+    fmt = logging.Formatter("| [%(asctime)s] | %(levelname)8s | %(message)s")
+    for h in res_logger.handlers:
+        h.setFormatter(fmt)
+    return res_logger
+
 
 if __name__ == "__main__":
-    logger.info("agents package main started...")
+    logger = setup_logging()
 
     wsaccel.patch_ws4py()
     dist = Distributor()
@@ -17,8 +25,8 @@ if __name__ == "__main__":
     ws_source = WebSocketSource(
         "wss://socketsbay.com/wss/v2/1/demo/",
         protocols=["http-only", "chat"],
-        logger=logger,
     )
+    ws_source.logger = logger
     dist.add_source(ws_source)
     dist.connect()
 

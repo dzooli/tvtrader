@@ -7,11 +7,14 @@ Source connector declarations for the message distribution
 
 """
 
+import logging
 from typing import TypeVar
 from abc import abstractmethod, ABCMeta
 
 from ws4py.client.threadedclient import WebSocketClient
 from ws4py.exc import HandshakeError
+
+from ..logutil import LoggingMixin
 
 CAbstractDistributionSource = TypeVar(
     "CAbstractDistributionSource", bound="AbstractDistributionSource"
@@ -36,43 +39,31 @@ class AbstractDistributionSource(metaclass=ABCMeta):
         ...
 
 
-class WebSocketSource(AbstractDistributionSource):
+class WebSocketSource(AbstractDistributionSource, LoggingMixin):
     _ws = None
-    _logger = None
 
     def __init__(self, url, **kwargs):
-        own_kwargs = ["logger"]
-        pass_kwargs = dict([(k, v) for k, v in kwargs.items() if k not in own_kwargs])
-        self._ws = WebSocketClient(url, **pass_kwargs)
+        self._ws = WebSocketClient(url, **kwargs)
         self._ws.opened = self.opened
         self._ws.closed = self.closed
-        try:
-            self._logger = kwargs["logger"]
-        except KeyError:
-            pass
 
     def close(self, code=1000, reason=""):
         self._ws.close(code, reason)
         self._ws.closed(code, reason)
 
     def connect(self):
-        if self._logger:
-            self._logger.debug(f"{__name__}: connecting to the websocket server...")
+        self.log(logging.DEBUG, "connecting to the websocket server...")
         try:
             self._ws.connect()
         except HandshakeError:
-            if self._logger:
-                self._logger.error("WS connection handshake error!")
-        if self._logger:
-            self._logger.info("WS connected")
+            self.log(logging.ERROR, "WS connection handshake error!")
+        self.log(logging.INFO, "WS connected")
 
     def opened(self):
-        if self._logger:
-            self._logger.info("source connected")
+        self.log(logging.INFO, "source connected")
 
     def closed(self, code, reason=None):
-        if self._logger:
-            self._logger.info(f"connection closed: {reason} ({code})")
+        self.log(logging.INFO, f"connection closed: {reason} ({code})")
 
     def set_on_message(self, message_function):
         self._ws.received_message = message_function
