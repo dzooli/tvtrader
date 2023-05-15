@@ -24,6 +24,12 @@ CDistributor = TypeVar("CDistributor", bound="Distributor")
 
 @define
 class Distributor(LoggingMixin):
+    """
+    A message distributor.
+
+    Targets must implement AbstractDistributionTarget and
+    sources must implement AbstractDistributionSource.
+    """
     _shutdown_progress: bool = field(default=False)
     _queue: Queue = field(factory=Queue)
     _src_threadlist: list = field(factory=list)

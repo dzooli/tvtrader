@@ -14,6 +14,6 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/dzooli/tvtrader",
     license="MIT",
-    python_requires=">=3.8",
-    install_requires=["aio_pika", "ws4py", "wsaccel"],
+    python_requires=">=3.11",
+    install_requires=["aio_pika", "ws4py", "wsaccel", "click"],
 )

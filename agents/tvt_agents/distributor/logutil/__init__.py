@@ -1,3 +1,6 @@
+"""
+A helper module for flexible logging inside inherited classes.
+"""
 import logging
 from attrs import define, field, validators
 
