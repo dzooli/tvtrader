@@ -10,22 +10,24 @@ import socket
 import time
 from multiprocessing import Queue
 
-import attrs
+from textwrap import dedent
 from sanic import Sanic, Request, HTTPResponse
 from sanic.log import logger
 from sanic.response import json
 from sanic.worker.manager import WorkerManager
-from sanic_ext import validate, Config
+from sanic_ext import validate, openapi as doc
+from sanic_ext.extensions.openapi.definitions import (
+    Response as ResponseDoc,
+)
 from sanic_ext.exceptions import ValidationError
-from sanic_openapi import openapi2_blueprint, doc
 
 import src.actions.carbon as actions_carbon
 import src.actions.websocket as actions_ws
 import src.app.helpers as helpers
 from src.app.context import TvTraderContext
 from src.config import AppConfig
-from src.schemas.alerts import TradingViewAlert, TradingViewAlertSchema
-from src.schemas.responses import SuccessResponseSchema, ErrorResponseSchema
+from src.models.alerts import TradingViewAlert
+from src.models.responses import SuccessResponse, ErrorResponse
 
 wsclients: set = set()
 carbon_connection = None
@@ -38,9 +40,12 @@ except ConnectionRefusedError:
 
 appctx = TvTraderContext()
 appctx.carbon_sock = carbon_connection
-app = Sanic("TvTrader", config=AppConfig(), configure_logging=True, ctx=appctx)
-app.extend(config=Config(oas=False, health=True, health_endpoint=True, logging=True))
-app.blueprint(openapi2_blueprint)
+app: Sanic = Sanic("TvTrader", config=AppConfig(), configure_logging=True, ctx=appctx)
+app.ext.openapi.describe(
+    "TvTrader API",
+    version="1.0.0",
+    description=dedent("TradingView alert helper API"),
+)
 
 
 @app.main_process_start
@@ -50,52 +55,49 @@ async def main_process_start(app):
 
 @app.exception(ValidationError, ValueError)
 def handle_validation_errors(request: Request, exception) -> HTTPResponse:
-    """
-    Handle validation errors with a proper JSON response.
-
-    Args:
-        request (Request): The incoming request
-        exception (_type_): Validation exception to handle.
-
-    Returns:
-        HTTPResponse: _description_
-    """
-    return json(body={"description": str(exception), "message": 'ERROR', "status": 400}, status=400)
+    return json(
+        body={"description": str(exception), "message": "ERROR", "status": 400},
+        status=400,
+    )
 
 
 @app.route("/", methods=["GET"])
-@doc.tag("Backend")
-@doc.summary("Healthcheck endpoint")
-@doc.response(200, SuccessResponseSchema, description="Success")
+@doc.definition(
+    tag="Backend",
+    summary="Healthcheck endpoint",
+    response=ResponseDoc(
+        {"application/json": SuccessResponse}, description="Success", status=200
+    ),
+)
 async def check(request: Request) -> HTTPResponse:
-    """
-    Healthcheck endpoint.
-
-    Args:
-        request (Request): The HTTP request
-
-    Returns:
-        HTTPResponse: The health status
-    """
     return json({"status": 200, "message": "HEALTHY " + app.config.APPNAME})
 
 
 @app.route("/alert", methods=["POST"])
-@doc.tag("Frontend")
-@doc.operation("frontendAlert")
-@doc.consumes(TradingViewAlertSchema, location="body")
-@doc.response(200, SuccessResponseSchema, description="Success")
-@doc.response(
-    400,
-    ErrorResponseSchema,
-    description="Error. See 'description' property in the response",
+@doc.definition(
+    tag="Frontend",
+    operation="receiveAlert",
+    description="Create an alert and pass it to the websocket",
+    body={"application/json": TradingViewAlert.model_json_schema()},
+    response=[
+        ResponseDoc(
+            {"application/json": SuccessResponse},
+            description="Operation successful",
+            status=200,
+        ),
+        ResponseDoc(
+            {"application/json": ErrorResponse},
+            description="Operation failed",
+            status=400,
+        ),
+    ],
 )
 @validate(json=TradingViewAlert)
 async def alert_post(request, body: TradingViewAlert):
     """
     Alert POST endpoint to proxy the alerts to the frontend application.
     """
-    jsondata = attrs.asdict(body)
+    jsondata = body.model_dump()
     helpers.add_timezone_info(jsondata, Sanic.get_app())
     helpers.format_json_input(jsondata)
     await actions_ws.send_metric(jsondata, wsclients)
@@ -103,21 +105,30 @@ async def alert_post(request, body: TradingViewAlert):
 
 
 @app.route("/carbon-alert", methods=["POST"])
-@doc.tag("Backend")
-@doc.operation("carbonAlert")
-@doc.consumes(TradingViewAlertSchema, location="body")
-@doc.response(200, SuccessResponseSchema, description="Success")
-@doc.response(
-    400,
-    ErrorResponseSchema,
-    description="Error. See 'description' property in the response",
+@doc.definition(
+    tag="Backend",
+    operation="forwardAlert",
+    description="Create an alert and pass it to the connected Carbon service",
+    body={"application/json": TradingViewAlert.model_json_schema()},
+    response=[
+        ResponseDoc(
+            {"application/json": SuccessResponse},
+            description="Operation successful",
+            status=200,
+        ),
+        ResponseDoc(
+            {"application/json": ErrorResponse},
+            description="Operation failed",
+            status=400,
+        ),
+    ],
 )
 @validate(json=TradingViewAlert)
 async def carbon_alert_post(request, body: TradingViewAlert):
     """
     Alert POST endpoint to forward the alerts to a Carbon server.
     """
-    jsondata = attrs.asdict(body)
+    jsondata = body.model_dump()
     helpers.add_timezone_info(jsondata, Sanic.get_app())
     helpers.format_json_input(jsondata)
     # Message meaning conversion to numbers
@@ -138,7 +149,7 @@ async def carbon_alert_post(request, body: TradingViewAlert):
 
 
 @doc.exclude(True)
-@doc.route(summary="Websocket endpoint")
+@doc.definition(exclude=True)
 @app.websocket("/wsalerts")
 async def feed(request, ws):
     """

@@ -46,10 +46,10 @@ pytest-xdist
 pytz
 PyYAML
 requests
-sanic==22.9.1
-sanic-ext==22.9.0
-sanic-openapi==21.12.0
-sanic-routing==22.8.0
+sanic
+sanic-ext
+sanic-openapi
+sanic-routing
 six
 smmap
 stevedore

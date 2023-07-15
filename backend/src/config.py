@@ -13,17 +13,15 @@ class AppConfig(Config):
     APPNAME = "TradingView Trader"
     PORT = 8089
     KEEP_ALIVE_TIMEOUT = 60
-    ERROR_FORMAT = 'json'
-    API_TITLE = "TvTrader API"
-    API_VERSION = "1.0.0"
-    API_DESCRIPTION = "TradingView alert helper API"
-    API_CONTACT_EMAIL = "zoltan.dzooli.fabian@gmail.com"
+    ERROR_FORMAT = "json"
     API_SECURITY = [{"BasicAuth": [], "ApiKeyAuth": []}]
     API_SECURITY_DEFINITIONS = {
         "BasicAuth": {"type": "basic"},
         "ApiKeyAuth": {"type": "apiKey", "in": "header", "name": "X-API-KEY"},
     }
     OAS_IGNORE_OPTIONS = True
+    OAS_UI_DEFAULT = "swagger"
+    CORS_ALWAYS_SEND = True
     CORS_ORIGINS = "http://localhost:8080"
     CORS_AUTOMATIC_OPTIONS = True
     CORS_METHODS = ["GET", "POST", "OPTIONS"]
