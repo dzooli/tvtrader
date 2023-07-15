@@ -1,4 +1,5 @@
 import requests
+from pprint import pprint
 from pytest_bdd import when, then, given, parsers
 
 
@@ -47,6 +48,8 @@ def step_resp_code_is(code: int, response: requests.Response) -> None:
         response (requests.Response): Target response of the check
     """
     assert isinstance(response, requests.Response)
+    pprint(response.json())
+    pprint(response.request.body)
     assert (
         response.status_code == code
     ), f"Got unexpected response code {response.status_code} (expected: {code})"
