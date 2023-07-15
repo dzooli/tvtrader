@@ -24,7 +24,7 @@ class AppConfig(Config):
     CORS_ALWAYS_SEND = True
     CORS_ORIGINS = "http://localhost:8080"
     CORS_AUTOMATIC_OPTIONS = True
-    CORS_METHODS = ["GET", "POST", "OPTIONS"]
+    CORS_METHODS = ["GET", "POST", "OPTIONS", "HEAD"]
     SWAGGER_UI_CONFIGURATION = {
         "apisSorter": "alpha",
         "jsonEditor": "false",

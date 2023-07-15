@@ -16,27 +16,26 @@ from sanic.log import logger
 from sanic.response import json
 from sanic.worker.manager import WorkerManager
 from sanic_ext import validate, openapi as doc
-from sanic_ext.extensions.openapi.definitions import (
-    Response as ResponseDoc,
-)
 from sanic_ext.exceptions import ValidationError
 
-import src.actions.carbon as actions_carbon
-import src.actions.websocket as actions_ws
-import src.app.helpers as helpers
-from src.app.context import TvTraderContext
-from src.config import AppConfig
-from src.models.alerts import TradingViewAlert
-from src.models.responses import SuccessResponse, ErrorResponse
+from .actions import carbon as actions_carbon
+from .actions import websocket as actions_ws
+from .app import helpers
+from .app.context import TvTraderContext
+from .config import AppConfig
+from .models.alerts import TradingViewAlert
+from .models.responses.apidoc import SuccessDoc, Error400Doc
 
 wsclients: set = set()
-carbon_connection = None
+carbon_connection: socket.socket = socket.socket()
 try:
     carbon_connection = socket.create_connection(
-        (AppConfig.CARBON_HOST, AppConfig.CARBON_PORT)
+        (AppConfig.CARBON_HOST, AppConfig.CARBON_PORT), timeout=30
     )
 except ConnectionRefusedError:
-    logger.error("[ERROR] Carbon connection is not available.")
+    logger.error("[ERROR] Carbon connection is not available!")
+except TimeoutError:
+    logger.error("[ERROR]: Carbon connection timeout!")
 
 appctx = TvTraderContext()
 appctx.carbon_sock = carbon_connection
@@ -49,8 +48,8 @@ app.ext.openapi.describe(
 
 
 @app.main_process_start
-async def main_process_start(app):
-    app.shared_ctx.logger_queue = Queue()
+async def main_process_start(current_app):
+    current_app.shared_ctx.logger_queue = Queue()
 
 
 @app.exception(ValidationError, ValueError)
@@ -65,9 +64,7 @@ def handle_validation_errors(request: Request, exception) -> HTTPResponse:
 @doc.definition(
     tag="Backend",
     summary="Healthcheck endpoint",
-    response=ResponseDoc(
-        {"application/json": SuccessResponse}, description="Success", status=200
-    ),
+    response=SuccessDoc,
 )
 async def check(request: Request) -> HTTPResponse:
     return json({"status": 200, "message": "HEALTHY " + app.config.APPNAME})
@@ -79,18 +76,7 @@ async def check(request: Request) -> HTTPResponse:
     operation="receiveAlert",
     description="Create an alert and pass it to the websocket",
     body={"application/json": TradingViewAlert.model_json_schema()},
-    response=[
-        ResponseDoc(
-            {"application/json": SuccessResponse},
-            description="Operation successful",
-            status=200,
-        ),
-        ResponseDoc(
-            {"application/json": ErrorResponse},
-            description="Operation failed",
-            status=400,
-        ),
-    ],
+    response=[SuccessDoc, Error400Doc],
 )
 @validate(json=TradingViewAlert)
 async def alert_post(request, body: TradingViewAlert):
@@ -110,18 +96,7 @@ async def alert_post(request, body: TradingViewAlert):
     operation="forwardAlert",
     description="Create an alert and pass it to the connected Carbon service",
     body={"application/json": TradingViewAlert.model_json_schema()},
-    response=[
-        ResponseDoc(
-            {"application/json": SuccessResponse},
-            description="Operation successful",
-            status=200,
-        ),
-        ResponseDoc(
-            {"application/json": ErrorResponse},
-            description="Operation failed",
-            status=400,
-        ),
-    ],
+    response=[SuccessDoc, Error400Doc],
 )
 @validate(json=TradingViewAlert)
 async def carbon_alert_post(request, body: TradingViewAlert):
@@ -169,7 +144,7 @@ async def feed(request, ws):
 
 
 @app.after_server_stop
-def teardown():
+def teardown(app, loop):
     """
     Application shutdown
 
