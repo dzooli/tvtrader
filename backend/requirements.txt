@@ -55,7 +55,7 @@ smmap==5.0.0
 stevedore==4.1.0
 tomli==2.0.1
 typing_extensions==4.4.0
-urllib3==1.26.12
+urllib3==1.26.17
 virtualenv==20.16.6
 virtualenv-clone==0.5.7
 websockets==10.4
