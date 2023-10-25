@@ -4,16 +4,20 @@ from tvt_agents.distributor.target import AbstractDistributionTarget
 
 
 class ConsoleTarget(AbstractDistributionTarget):
+    """Simple console logger target.
+    Used for demonstration purposes only.
+    """
+
     def __init__(self):
         self._stream = None
 
-    def open(self, url: str | None = None, **kwargs):
+    def open(self):
         self._stream = sys.stdout
 
     def close(self):
         pass
 
-    def send(self, message):
+    def distribute(self, message):
         print(message)
 
 
