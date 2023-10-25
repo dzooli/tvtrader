@@ -18,6 +18,10 @@ class InvalidUrlException(DistributorException):
     pass
 
 
+class QueueEmpty(DistributorException):
+    pass
+
+
 class ConnectorNotInitialized(DistributorException):
     msg: str
 
