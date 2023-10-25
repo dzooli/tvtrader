@@ -23,6 +23,7 @@ behave = "^1.2.6"
 black = {extras = ["d"], version = "^23.7.0"}
 mkdocs = {version = "^1.4.2", extras = ["docs"]}
 pylint = "^2.17.3"
+ruff = "^0.1.2"
 
 
 [build-system]
