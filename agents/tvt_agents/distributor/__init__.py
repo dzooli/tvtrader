@@ -15,7 +15,6 @@ from attrs import define, field, validators
 
 from .source import AbstractDistributionSource
 from .target import AbstractDistributionTarget
-from .exceptions import QueueEmpty
 from .logutil import LoggingMixin
 
 
