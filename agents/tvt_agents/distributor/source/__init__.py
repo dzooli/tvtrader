@@ -8,13 +8,14 @@ Source connector interface declarations for message distribution
 """
 from typing import TypeVar
 from abc import abstractmethod, ABCMeta
+from ..base import AbstractDistributorEndpoint
 
 CAbstractDistributionSource = TypeVar(
     "CAbstractDistributionSource", bound="AbstractDistributionSource"
 )
 
 
-class AbstractDistributionSource(metaclass=ABCMeta):
+class AbstractDistributionSource(AbstractDistributorEndpoint, metaclass=ABCMeta):
     """Message source interface."""
 
     DISCONNECT_SHUTDOWN = 0
@@ -22,13 +23,5 @@ class AbstractDistributionSource(metaclass=ABCMeta):
     DISCONNECT_RECONNECT = 2
 
     @abstractmethod
-    def open(self):
-        """Opens the connection to the source."""
-
-    @abstractmethod
     def set_on_message(self, message_function):
         """Setup the callback function for incoming messages."""
-
-    @abstractmethod
-    def close(self, code=1000, reason=""):
-        """Closes the connection to the source."""
