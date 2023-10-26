@@ -22,6 +22,10 @@ class QueueEmpty(DistributorException):
     pass
 
 
+class ThreadingTargetException(DistributorException):
+    pass
+
+
 class ConnectorNotInitialized(DistributorException):
     msg: str
 

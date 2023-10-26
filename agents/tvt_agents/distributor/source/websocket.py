@@ -10,7 +10,7 @@ from . import AbstractDistributionSource
 
 
 class WebSocketSource(AbstractDistributionSource, LoggingMixin):
-    _ws = None
+    _ws: WebSocketClient
 
     def __init__(self, url, **kwargs):
         self._ws = WebSocketClient(url, **kwargs)
