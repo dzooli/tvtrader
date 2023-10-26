@@ -9,7 +9,6 @@ import importlib
 import logging
 import os
 import sys
-import typing
 from time import perf_counter
 import click
 import ws4py
@@ -69,7 +68,7 @@ def collect_dist_targets(src: str = "targets"):
             if obj:
                 logger.info(f"{name} has been registered as {obj}")
                 logger.debug(type(obj))
-                if not obj in dist_targets:
+                if obj not in dist_targets:
                     dist_targets.append(obj)
                 logger.debug(f"target count: {len(dist_targets)}")
             else:

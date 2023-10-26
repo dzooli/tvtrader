@@ -26,7 +26,7 @@ setuptools.setup(
         "Intended Audience :: Financial and Insurance Industry",
         "Intended Audience :: Developers",
     ],
-    description="Agents for the TvTrader suite",
+    description="Distributed agents framework for the TvTrader suite",
     long_description=description,
     long_description_content_type="text/markdown",
     url="https://github.com/dzooli/tvtrader",
