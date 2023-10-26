@@ -9,7 +9,7 @@ from attrs import define, field, validators
 class LoggingMixin:
     """Use this logger trait where needed."""
 
-    _logger: logging.Logger | None = field(
+    _logger: logging.Logger = field(
         init=True,
         validator=validators.optional(validators.instance_of(logging.Logger)),
     )
