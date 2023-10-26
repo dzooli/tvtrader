@@ -103,7 +103,7 @@ class Distributor(LoggingMixin):
     def _distribute_to_all(self, message):
         self.logger.debug(f"sending message '{message}' to all targets...")
         for tgt in self._targets:
-            tgt.distribute(message)
+            tgt.on_message(message)
             self.logger.info("message sent")
 
     def flush(self):

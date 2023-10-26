@@ -10,15 +10,19 @@ class ConsoleTarget(AbstractDistributionTarget):
 
     def __init__(self):
         self._stream = None
+        super().__init__()
 
     def open(self):
         self._stream = sys.stdout
 
-    def close(self):
-        pass
+    def close(self, code: int = -1, reason: str = ""):
+        """Not needed to close the console"""
 
-    def distribute(self, message):
-        print(message)
+    def on_message(self, message):
+        self.process(message)
+
+    def process(self, message: str):
+        print(message, file=self._stream)
 
 
 def create_console_target():
