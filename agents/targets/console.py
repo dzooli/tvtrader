@@ -1,28 +1,31 @@
 import sys
 
-from tvt_agents.distributor.target import AbstractDistributionTarget
+from tvt_agents.distributor.logutil import LoggingMixin
 
+from .base import ThreadedBase
 
-class ConsoleTarget(AbstractDistributionTarget):
+class ConsoleTarget(ThreadedBase, LoggingMixin):
     """Simple console logger target.
     Used for demonstration purposes only.
     """
 
     def __init__(self):
         self._stream = None
+        super(LoggingMixin, self).__init__()
         super().__init__()
 
     def open(self):
         self._stream = sys.stdout
 
-    def close(self, code: int = -1, reason: str = ""):
-        """Not needed to close the console"""
-
-    def on_message(self, message):
-        self.process(message)
+    async def on_message(self, message: str):
+        if self.logger:
+            self.logger.debug("starting thread for processing the message...")
+        return await super().on_message(message)
 
     def process(self, message: str):
-        print(message, file=self._stream)
+        if self.logger:
+            self.logger.debug(type(self))
+        print(type(self), ":", message, file=self._stream)
 
 
 def create_console_target():
