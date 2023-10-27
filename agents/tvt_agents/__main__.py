@@ -3,24 +3,36 @@
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 
-
-import cProfile
 import importlib
 import logging
 import os
 import sys
 from time import perf_counter
-import click
-import ws4py
-from click_default_group import DefaultGroup
 
+from pprint import pprint
+from urllib3 import util as url_util
+import asyncclick as click
+import ws4py
+import wsaccel
+
+from tvt_agents.distributor import Distributor
+from tvt_agents.distributor.source.websocket import WebSocketSource
 from tvt_agents.examples.threaded_target import run_example as threaded_example
 
+DEFAULT_LOG_LEVEL="DEBUG"
+DEFAULT_LOG_INT = -1
+try:
+    DEFAULT_LOG_INT=logging.getLevelNamesMapping()[DEFAULT_LOG_LEVEL]
+except KeyError:
+    print(f"Invalid default log level! ({DEFAULT_LOG_LEVEL})")
+    sys.exit(1)
+
+dist_targets = []
 
 def setup_logging(level: int = logging.DEBUG):
     res_logger = ws4py.configure_logger(level=level)
     fmt = logging.Formatter(
-        "%(asctime)s.%(msecs)03d - %(levelname)s - %(filename)s:%(lineno)s - %(message)s",
+        "[%(asctime)s.%(msecs)03d] REL:%(relativeCreated)d - PID:%(process)d - %(levelname)s - %(module)s:%(filename)s:%(lineno)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
     for h in res_logger.handlers:
@@ -28,16 +40,7 @@ def setup_logging(level: int = logging.DEBUG):
     return res_logger
 
 
-# # Logging configuration example without ws4py
-# logging.basicConfig(
-#     format="%(asctime)s.%(msecs)03d - %(levelname)s - %(filename)s:%(lineno)s - %(message)s",
-#     datefmt="%Y-%m-%d %H:%M:%S",
-#     level=logging.DEBUG,
-# )
-# logger = logging.getLogger()
-
-logger = setup_logging()
-dist_targets = []
+logger = setup_logging(DEFAULT_LOG_INT)
 
 
 def collect_dist_targets(src: str = "targets"):
@@ -57,7 +60,7 @@ def collect_dist_targets(src: str = "targets"):
             and name.startswith("create_")
             and name.endswith("_target")
         ):
-            logger.info(f"Found target: {name}. Registration...")
+            logger.info(f"Found target factory: {name}. Registration...")
             obj = None
             try:
                 obj = eval(f"targets_module.{name}")()
@@ -66,7 +69,7 @@ def collect_dist_targets(src: str = "targets"):
                     f"Cannot instantiate the distributor target with: {name}"
                 )
             if obj:
-                logger.info(f"{name} has been registered as {obj}")
+                logger.info(f"{obj} has been registered by {name}")
                 logger.debug(type(obj))
                 if obj not in dist_targets:
                     dist_targets.append(obj)
@@ -76,18 +79,15 @@ def collect_dist_targets(src: str = "targets"):
 
 
 @click.group
-def show():
-    """Show various internal information."""
-
-
-@click.group
 def example():
     """Run selected example."""
 
 
-@click.group
-def profile():
-    """Profile a selected example."""
+@example.command
+@click.option("--count", default=1000, help="Number of messages to process.")
+async def threadedtarget(count: int):
+    """Run the example for ThreadedDistributionTarget."""
+    await threaded_example(count)
 
 
 @click.group
@@ -95,28 +95,27 @@ def timing():
     """Get timing information of the selected example."""
 
 
-@example.command
-@click.option("--count", default=1000, help="Number of messages to process.")
-def threadedtarget(count: int):
-    """Run the example for ThreadedDistributionTarget."""
-    threaded_example()
-
-
-@profile.command
-@click.option("--count", default=1000, help="Number of messages to process.")
-def threadedtarget(count: int):
-    """Profile the example for ThreadedDistributionTarget."""
-    func = f"threaded_example({count})"
-    cProfile.run(func)
-
-
 @timing.command
 @click.option("--count", default=1000, help="Number of messages to process.")
-def threadedtarget(count: int):
+@click.option(
+    "--log_level",
+    type=click.Choice(
+        ["DEBUG", "ERROR", "WARNING", "INFO", "CRITICAL"], case_sensitive=False
+    ),
+    default=DEFAULT_LOG_LEVEL,
+    help="Set logging level.",
+)
+async def threadedtarget(count: int, log_level):
     """Measure execution time of ThreadedDistributionTarget."""
+    logger.setLevel(log_level)
     start_time = perf_counter()
-    threaded_example(count)
+    await threaded_example(count)
     print(f"Elapsed time: {(perf_counter() - start_time):0.6f}")
+
+
+@click.group
+def show():
+    """Show various internal information."""
 
 
 @show.command
@@ -126,8 +125,17 @@ def threadedtarget(count: int):
     is_flag=True,
     help="Display target's documentation if exists.",
 )
-def targets(verbose):
-    """Show loaded distribution targets"""
+@click.option(
+    "--log_level",
+    type=click.Choice(
+        ["DEBUG", "ERROR", "WARNING", "INFO", "CRITICAL"], case_sensitive=False
+    ),
+    default=DEFAULT_LOG_LEVEL,
+    help="Set logging level.",
+)
+def targets(verbose, log_level):
+    """Show loadable distribution targets"""
+    logger.setLevel(log_level)
     collect_dist_targets()
     print("\nInitialized targets: ")
     for obj in dist_targets:
@@ -137,49 +145,77 @@ def targets(verbose):
             print("   ", obj.__doc__)
 
 
-@click.group(cls=DefaultGroup, default="start", default_if_no_args=True)
+@click.group
 def cli():
-    """CLI for distributed agents."""
+    """CLI for distributed trading agents."""
+
+
+async def run_websocket_source_loop(logger, websocket_url: str | None = None):
+    if not websocket_url:
+        logger.error("WS source not specified!")
+        raise ValueError
+    wsaccel.patch_ws4py()
+    dist = Distributor(logger)
+    dist.logger = logger
+    ws_source = WebSocketSource(
+        websocket_url,
+        protocols=["http-only", "chat"],
+    )
+    ws_source.logger = logger
+    dist.add_source(ws_source)
+    for target in dist_targets:
+        target.logger = logger
+        dist.add_target(target)
+    dist.connect()
+
+    try:
+        await dist.run()
+    except KeyboardInterrupt:
+        await dist.shutdown()
+
+
+def validate_url_scheme(url: str, req_scheme: str = "ws") -> bool:
+    logger.info("Validating URL scheme...")
+    p_url = url_util.parse_url(url)
+    return isinstance(p_url, url_util.Url) and isinstance(p_url.scheme, str) and p_url.scheme.startswith(req_scheme)
 
 
 @cli.command
-def start(src: str = "targets"):
+@click.option(
+    "--log_level",
+    type=click.Choice(
+        ["DEBUG", "ERROR", "WARNING", "INFO", "CRITICAL"], case_sensitive=False
+    ),
+    default=DEFAULT_LOG_LEVEL,
+    help="Set logging level.",
+)
+@click.option(
+    "--src", default="targets", help="Directory for dynamic target modules."
+)
+@click.option('--ws_url', default="wss://socketsbay.com/wss/v2/1/demo/", help="Websocket distribution source URL.")
+async def start(src: str, log_level: str, ws_url: str):
+    """Start the distributor with WS source and targets from [src] directory.
+
+    src: is './targets' by default.
+
+    Each dynamic target module must define a create_<targetname>_target() function to be detectable as a target module.
+    """
+    logger.setLevel(log_level)
     collect_dist_targets(src)
+    if not validate_url_scheme(ws_url):
+        click.secho("Invalid ws_url!", fg="red")
+        return
     logger.info("Starting the distributor...")
+    await run_websocket_source_loop(logger, ws_url)
 
 
 def main():
     cli.add_command(show)
     cli.add_command(example)
-    cli.add_command(profile)
     cli.add_command(timing)
     cli()
 
 
-# Test for dynamically created targets
 if __name__ == "__main__":
     main()
     sys.exit()
-
-
-# Basic usage without dynamic import
-# import wsaccel
-# from tvt_agents.distributor import Distributor
-# from tvt_agents.distributor.source.websocket import WebSocketSource
-# logger = setup_logging()
-# def run_loop():
-#     wsaccel.patch_ws4py()
-#     dist = Distributor()
-#     dist.logger = logger
-#     ws_source = WebSocketSource(
-#         "wss://socketsbay.com/wss/v2/1/demo/",
-#         protocols=["http-only", "chat"],
-#     )
-#     ws_source.logger = logger
-#     dist.add_source(ws_source)
-#     dist.connect()
-
-#     try:
-#         dist.run()
-#     except KeyboardInterrupt:
-#         dist.shutdown()
