@@ -35,7 +35,7 @@ class Distributor(LoggingMixin):
     _src_threadlist: list[Thread] = field(factory=list)
     _sources: List[AbstractDistributionSource] = field(factory=list)
     _targets: List[AbstractDistributionTarget] = field(factory=list)
-    _send_delay: float = field(default=0.2, validator=validators.gt(0.0))
+    _send_delay: float = field(default=0.0, validator=validators.ge(0.0))
 
     @property
     def delay(self):
@@ -86,35 +86,35 @@ class Distributor(LoggingMixin):
         self._src_threadlist.append(
             Thread(target=self._enqueue, kwargs={"message": message})
         )
-        self.logger.debug("Starting equeue thread...")
+        self.logger.debug("Starting enqueue thread...")
         self._src_threadlist[-1].start()
 
-    def run(self):
+    async def run(self):
         while True:
             try:
                 last_msg = self._queue.get(block=False)
             except queue.Empty:
                 sleep(self._send_delay)
                 continue
-            self._distribute_to_all(last_msg)
+            await self._distribute_to_all(last_msg)
             self._queue.task_done()
             sleep(self._send_delay)
 
-    def _distribute_to_all(self, message):
+    async def _distribute_to_all(self, message):
         self.logger.debug(f"sending message '{message}' to all targets...")
         for tgt in self._targets:
-            tgt.on_message(message)
-            self.logger.info("message sent")
+            await tgt.on_message(message)
+            self.logger.info("message distributed")
 
-    def flush(self):
+    async def flush(self):
         self.logger.info("Flushing the queue...")
         while not self._queue.empty():
             last_msg = self._queue.get(block=False)
-            self._distribute_to_all(last_msg)
+            await self._distribute_to_all(last_msg)
             self._queue.task_done()
             sleep(self._send_delay)
 
-    def shutdown(self):
+    async def shutdown(self):
         self._shutdown_progress = True
         self.logger.info("closing sources...")
         for src in self._sources.copy():
@@ -123,7 +123,7 @@ class Distributor(LoggingMixin):
                 reason="shutdown by distributor",
             )
 
-        self.flush()
+        await self.flush()
 
         self.logger.info("closing targets...")
         for tgt in self._targets.copy():

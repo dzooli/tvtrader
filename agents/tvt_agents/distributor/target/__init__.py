@@ -19,7 +19,7 @@ CAbstractDistributionTarget = TypeVar(
 
 class AbstractDistributionTarget(AbstractDistributorEndpoint, metaclass=ABCMeta):
     @abstractmethod
-    def on_message(self, message: str):
+    async def on_message(self, message: str):
         self.process(message)
 
     @abstractmethod
@@ -41,7 +41,7 @@ class ThreadedDistributionTarget(AbstractDistributionTarget):
         )
 
     def open(self):
-        pass
+        "Opened and started by the constructor."
 
     def _check_complete(self, result: Future):
         res = None
@@ -72,7 +72,7 @@ class ThreadedDistributionTarget(AbstractDistributionTarget):
         """Callback method for exception raised in the process() call."""
         pass
 
-    def on_message(self, message: str):
+    async def on_message(self, message: str):
         task = self._pool.submit(self.process, message)
         task.add_done_callback(self._check_complete)
 

@@ -34,7 +34,7 @@ class TestThreadedTarget(ThreadedDistributionTarget):
         return super().on_error(exception)
 
 
-def run_example(msgcount: int = 1000):
+async def run_example(msgcount: int = 1000):
     """Start the distributor target and send "msgcount" messages to it.
 
     Args:
@@ -42,11 +42,7 @@ def run_example(msgcount: int = 1000):
     """
     pooltarget = TestThreadedTarget()
 
-    for i in range(1, msgcount):
-        pooltarget.on_message(f"hello world #{i}")
+    for i in range(0, msgcount):
+        await pooltarget.on_message(f"hello world #{i}")
 
     pooltarget.close()
-
-
-if __name__ == "__main__":
-    run_example()
