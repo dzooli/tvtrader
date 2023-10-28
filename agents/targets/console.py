@@ -11,7 +11,7 @@ class ConsoleTarget(ThreadedBase, LoggingMixin):
 
     def __init__(self):
         self._stream = None
-        super(LoggingMixin, self).__init__()
+        LoggingMixin.__init__(self)
         super().__init__()
 
     def open(self):
