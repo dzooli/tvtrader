@@ -1,3 +1,6 @@
 [submodule "backend"]
 	path = backend
 	url = https://github.com/dzooli/tvtrader-backend.git
+[submodule "agents"]
+	path = agents
+	url = https://github.com/dzooli/tvtrader-agents.git
