@@ -5,3 +5,7 @@
 	path = frontend
 	url = https://github.com/dzooli/tvtrader-frontend.git
 	branch = main
+[submodule "backend"]
+	path = backend
+	url = https://github.com/dzooli/tvtrader-backend.git
+	branch = main
