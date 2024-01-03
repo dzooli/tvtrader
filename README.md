@@ -12,7 +12,7 @@ Also a good candidate to learn more about test automation. **Pytest-BDD** is use
 
 ## Overview
 
-![system overview](doc/tvtrader_schema.drawio.png)
+_TBD using C4_
 
 ## Features
 
@@ -25,9 +25,9 @@ Also a good candidate to learn more about test automation. **Pytest-BDD** is use
 
 ### Distributor features
 
-- Use Websocket as a source
+- Use Websocket as a source (an usable websocket is in the backend)
 - Use dynamically loaded distribution targets
-  - Example target implementation is included with CLI
+  - Example console target implementation is included with CLI
   - More is on way
 
 ### Example Grafana dashboard
