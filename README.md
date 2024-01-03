@@ -27,7 +27,7 @@ Also a good candidate to learn more about test automation. **Pytest-BDD** is use
 
 - Use Websocket as a source
 - Use dynamically loaded distribution targets
-  - Example target implementation is included
+  - Example target implementation is included with CLI
   - More is on way
 
 ### Example Grafana dashboard
