@@ -4,7 +4,7 @@
 
 ## Description
 
-This is a full stack Sanic+Vue application for easily collect and process TradingView alerts.
+This is a full stack Sanic+Vue application for easily collect and process TradingView alerts. Includes a modular alert distribution layer in the ```agents``` directory.
 
 Also a good candidate to learn more about test automation. **Pytest-BDD** is used for test automation, see the `tests` folder for examples.
 
@@ -22,6 +22,13 @@ Also a good candidate to learn more about test automation. **Pytest-BDD** is use
 - Display latest alerts on the Web UI
 - Easy connection of external trading strategy alerts
 - REST API (start the backend and go to [http://localhost:8089/swagger] for details)
+
+### Distributor features
+
+- Use Websocket as a source
+- Use dynamically loaded distribution targets
+  - Example target implementation is included
+  - More is on way
 
 ### Example Grafana dashboard
 
