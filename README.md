@@ -25,7 +25,7 @@ _TBD using C4_
 
 ### Distributor features
 
-- Use Websocket as a source (an usable websocket is in the backend)
+- Use Websocket as a source (an usable websocket is included in the backend)
 - Use dynamically loaded distribution targets
   - Example console target implementation is included with CLI
   - More is on way
