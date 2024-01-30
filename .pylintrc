@@ -1,0 +1,11 @@
+; Copyright (c) 2024 Zoltan Fabian
+; 
+; This software is released under the MIT License.
+; https://opensource.org/licenses/MIT
+
+[MASTER]
+disable=
+    C0114,
+    C0115,
+    C0116,
+    C0301,
