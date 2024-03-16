@@ -1,8 +1,7 @@
 # TvTrader fullstack
 
 [![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-orange.svg)](https://sonarcloud.io/summary/new_code?id=dzooli_tvtrader)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=dzooli_tvtrader&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=dzooli_tvtrader)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=dzooli_tvtrader&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=dzooli_tvtrader)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=dzooli_tvtrader&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=dzooli_tvtrader) [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=dzooli_tvtrader&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=dzooli_tvtrader)
 
 ## Description
 
@@ -18,7 +17,7 @@ Also a good candidate to learn more about test automation. **Pytest-BDD** is use
 
 ```plantuml
 @startuml C4_Elements
-!include <C4_Container.puml>
+!include doc/C4-PlantUML/C4_Container.puml
 
 LAYOUT_WITH_LEGEND()
 
@@ -26,12 +25,12 @@ AddElementTag("dev", $fontColor="yellow")
 AddRelTag("future", $textColor="lightgrey", $lineColor="grey", $lineStyle = DashedLine())
 Person(user, "Users")
 
-System_Ext(tradingview, "TradingViews", "Data source")
+System_Ext(tradingview, "TradingView", "Data source")
 Container(tvtrader_frontend, "Frontend", "VueJs", "Alert dashboard")
 
 System_Boundary(data_backend, "Data Backend") {
   Container(fetcher, "Fetcher", "REST, NestJs", "Allows users to dinamycally fetch price data from TradingView")
-  SystemDb(influx, "InfluxDB", "FluxScript", "")
+  SystemDb(influx, "Store", "InfluxDB, FluxScript")
   Container(tvtrader_backend, "Backend", "WS, REST", "API backend for the dashboard")
   Container(tvtrader_distributor, "Distributor", "Python", "Receiver and distributor for the alerts")
 }

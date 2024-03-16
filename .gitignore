@@ -35,4 +35,8 @@ venv
 C4*.puml
 C4-PlantUML
 
+archive/
+pytest_html_report.html
+output.json
+
 
