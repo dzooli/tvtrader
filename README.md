@@ -45,7 +45,7 @@ System_Boundary(dist_targets, "Distribution Targets") {
   Container_Ext(future_frontend, "Future Frontend", "Vue3+Quasar")
   Rel_D(sysdev, opt_target, "Implements distribution targets")
   Rel_U(sysdev, carbon, "Implements distribution targets")
-  Rel_L(sysdev, grafana, "Implements distribution targets")  
+  Rel_L(sysdev, grafana, "Implements distribution targets")
   Rel_R(sysdev, logging, "Implements distribution targets")
   Rel_U(sysdev, future_frontend, "Implements features", $tags="future")
 }
@@ -53,7 +53,7 @@ System_Boundary(dist_targets, "Distribution Targets") {
 System_Boundary(strategies, "Strategy evaluators") {
   Container(strategy_1, "Jupyter", "NumPy, Pandas", "Evaluator for the strategy")
   Container(opt_strategy, "Others", "Various technologies", "Additional evaluators")
-  Person(quant, "Quantitative Developer", $tags="dev")    
+  Person(quant, "Quantitative Developer", $tags="dev")
   System_Boundary(browser, "Browser") {
     Container_Ext(tvui, "TradingView UI", "User interface for TradingView")
     Container(alertmonitor, "Monitoring script", "Monitor for the alert panel")
@@ -115,6 +115,19 @@ Clone the repository and change the current directory to it.
 ```bash
 git clone https://github.com/dzooli/tvtrader.git
 cd tvtrader
+```
+
+### Testing
+
+Use the requirements_dev.txt for virtualenv creation:
+
+```bash
+python -m venv .
+source venv/bin/activate
+pip install -r backend/requirements.txt
+pip install -r backend/requirements_dev.txt
+pytest backend
+pytest agents/tvt_agents
 ```
 
 ### Backend

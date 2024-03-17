@@ -13,7 +13,6 @@ pnpm-debug.log*
 
 # Editor directories and files
 .idea
-.vscode
 *.suo
 *.ntvs*
 *.njsproj
@@ -36,7 +35,9 @@ C4*.puml
 C4-PlantUML
 
 archive/
+reports/
 pytest_html_report.html
 output.json
 
-
+.coverage
+coverage.xml
