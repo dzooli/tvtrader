@@ -12,3 +12,6 @@
 [submodule "fetcher-rest"]
 	path = fetcher-rest
 	url = https://github.com/dzooli/tvtrader-fetch.git
+[submodule "storage"]
+	path = storage
+	url = https://github.com/dzooli/tvtrader-store.git
