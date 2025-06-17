@@ -1,9 +1,9 @@
 .DS_Store
-/frontend/node_modules
-/frontend/dist
+node_modules
+dist
 
-/frontend/tests/e2e/videos/
-/frontend/tests/e2e/screenshots/
+*/tests/e2e/videos/
+*/tests/e2e/screenshots/
 
 # Log files
 npm-debug.log*
@@ -13,7 +13,6 @@ pnpm-debug.log*
 
 # Editor directories and files
 .idea
-.vscode
 *.suo
 *.ntvs*
 *.njsproj
@@ -32,4 +31,16 @@ venv
 .pytest_cache
 .mypy_cache
 
+C4*.puml
+C4-PlantUML
 
+archive/
+reports/
+pytest_html_report.html
+output.json
+
+.coverage
+coverage.xml
+
+storage/.idea
+*/.env*

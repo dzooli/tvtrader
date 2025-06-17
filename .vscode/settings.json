@@ -1,0 +1,46 @@
+{
+    "cSpell.words": [
+        "appctx",
+        "APPNAME",
+        "Healthcheck",
+        "jsondata",
+        "mday",
+        "pytz",
+        "sanic",
+        "Sanic",
+        "strat",
+        "timediff",
+        "timeframe",
+        "wsalerts",
+        "wsclients",
+        "Zoltan"
+    ],
+    "cSpell.ignoreWords": [
+        "TVTRADER",
+        "attrname",
+        "capsys"
+    ],
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/.pytest_cache": true,
+        ".pytest_cache": true,
+        "**/__pycache__": true
+    },
+    "python.testing.pytestArgs": [
+        "backend",
+        "agents/tvt_agents"
+    ],
+    "python.analysis.autoFormatStrings": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "sonarlint.connectedMode.project": {
+        "connectionId": "dzooli",
+        "projectKey": "dzooli_tvtrader"
+    },
+    "iis.configDir": ""
+}
