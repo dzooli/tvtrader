@@ -43,3 +43,4 @@ output.json
 coverage.xml
 
 storage/.idea
+*/.env*
