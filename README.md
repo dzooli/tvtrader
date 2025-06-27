@@ -5,7 +5,7 @@
 
 ## Description
 
-This is a full stack Sanic+Vue application for easily collect and process TradingView alerts and possibly execute custom tradin strategies. Includes a modular alert distribution layer in the ```agents``` directory.
+This is a full stack Sanic+Vue application for easily collect and process TradingView alerts and possibly execute custom trading strategies. Includes a modular alert distribution layer in the ```agents``` directory.
 
 Also a good candidate to learn more about test automation. **Pytest-BDD** is used for test automation, see the `tests` folder for examples.
 
@@ -17,7 +17,7 @@ Also a good candidate to learn more about test automation. **Pytest-BDD** is use
 
 ```plantuml
 @startuml C4_Elements
-!include doc/C4-PlantUML/C4_Container.puml
+!include  <C4/C4_Container>
 
 LAYOUT_WITH_LEGEND()
 
@@ -43,10 +43,10 @@ System_Boundary(dist_targets, "Distribution Targets") {
   Container(logging, "Logging", "Optional loogging for the alerts")
   Container(opt_target, "...", "Other types of distribution targets")
   Container_Ext(future_frontend, "Future Frontend", "Vue3+Quasar")
-  Rel_D(sysdev, opt_target, "Implements distribution targets")
-  Rel_U(sysdev, carbon, "Implements distribution targets")
-  Rel_L(sysdev, grafana, "Implements distribution targets")
-  Rel_R(sysdev, logging, "Implements distribution targets")
+  Rel_D(sysdev, opt_target, "Implements distribution target")
+  Rel_U(sysdev, carbon, "Implements distribution target")
+  Rel_L(sysdev, grafana, "Implements distribution target")
+  Rel_R(sysdev, logging, "Implements distribution target")
   Rel_U(sysdev, future_frontend, "Implements features", $tags="future")
 }
 
@@ -76,36 +76,51 @@ Rel_R(tvtrader_backend, tvtrader_frontend, "Receives alerts for visualization", 
 Rel(tvtrader_backend, tvtrader_distributor, "Receives alerts for distribution", "WebSocket")
 Rel_U(user, tvtrader_frontend, "Monitors the alerts")
 Rel_U(user, future_frontend, "Monitors the alerts", $tags="future")
-Rel_U(quant, opt_strategy, "Implements new strategies")
-Rel_U(quant, strategy_1, "Implements new strategies")
+Rel_U(quant, opt_strategy, "Implements strategies")
+Rel_U(quant, strategy_1, "Implements strategies")
 @enduml
 ```
 
 
 ## Features
 
-- Receives alerts via custom scripts injected to TradingView using TamperMonkey
-- Forwards received alerts to the connected websocket clients
-- Forwards received alerts to a Graphite RRD for further processing (for example in Grafana)
-- Displays latest alerts on the Web UI
-- Easy connection of external trading strategy alerts
+### Fetcher
+
+- Receiving price information from TradingView
+- Publishing the prices upon HTTP GET in JSON format
+
+### Store
+
+- InfluxDB FluxScript to store the price information from the fetcher - (WIP)
+
+### Backend
+
+- Receiving alerts via HTTP PUST (for example by custom scripts injected to TradingView using TamperMonkey)
+- Forwarding received alerts to the connected websocket clients
 - REST API (start the backend and go to [http://localhost:8089/swagger] for details)
 
-### Distributor features
+### Distributor
 
-- Use Websocket as a source (an usable websocket is included in the backend)
-- Use dynamically loaded distribution targets
-  - Example console target implementation is included with CLI
-  - More is on way
+- Receive alerts from various sources (currently the backend's websocket)
+- Forwarding alerts to the connected distribution targets
+- Loading of distribution targets upon startup from a directory
+  - Example console target implementation is included with a CLI
 
-### Example Grafana dashboard
+### Frontend
 
-![grafana dashboard](doc/grafana_dashboard.png)
+- Receiving incoming alerts from the connected backend
+- Displaying latest alerts on the Web UI
+- Configurable timeout for the alerts
+- Color coding the status of the alerts
 
-## Stack
+## Tech stack
 
-- Sanic for the backend
-- Vue with Vuex and Vuetify for the frontend
+- Python
+  - Sanic framework for the backend
+- Javascript
+  - Vue with Vuex and Vuetify for the frontend
+  - Nest.js for the fetcher
+  - For the TamperMonkey scripts
 - Docker for containerization (coming soon)
 
 ## Installation
@@ -191,10 +206,10 @@ Open TradingView, login and display the alerts panel. Add a properly formatted a
 ```json
 {
     "stratId":1,
-    "stratName":"STARTNAME1",
+    "stratName": "STRATEGY_NAME1",
     "symbol": "{{exchange}}:{{ticker}}",
-    "interval":{{interval}},
-    "direction":"{{strategy.order.comment}}",
+    "interval": {{interval}},
+    "direction": "{{strategy.order.comment}}",
     "timestamp": "{{timenow}}"
 }
 ```
@@ -209,4 +224,4 @@ Start the backend first and the frontend. Open the frontend with your browser on
 
 ## Extras
 
-In the `doc` folder you can find a Grafana dashboard example JSON file directly exported from my working setup.
+In the `doc` folder you can find various useful information as well as the developer documentation (WIP).
