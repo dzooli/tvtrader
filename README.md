@@ -87,7 +87,7 @@ Rel_U(quant, strategy_1, "Implements strategies")
 ### Fetcher
 
 - Receiving price information from TradingView
-- Publishing the prices upon HTTP GET in JSON format
+- Publishing the prices upon HTTP GET with some additional data in JSON format
 
 ### Store
 
@@ -95,7 +95,7 @@ Rel_U(quant, strategy_1, "Implements strategies")
 
 ### Backend
 
-- Receiving alerts via HTTP PUST (for example by custom scripts injected to TradingView using TamperMonkey)
+- Receiving alerts via HTTP POST (for example by custom scripts injected to TradingView using TamperMonkey)
 - Forwarding received alerts to the connected websocket clients
 - REST API (start the backend and go to [http://localhost:8089/swagger] for details)
 
