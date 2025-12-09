@@ -44,3 +44,7 @@ coverage.xml
 
 storage/.idea
 */.env*
+*/.venv
+*__pycache__
+backend/.idea
+backend/venv
